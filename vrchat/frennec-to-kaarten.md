@@ -6,22 +6,33 @@ Companion to [`kaarten-fast-path.md`](kaarten-fast-path.md).
 
 ---
 
-## First — consider a feline base instead
+## Base: Frennec — decided
 
-Frennec is a **fennec fox**. Converting him to a lion means changing the ears, the muzzle, the paws, the tail and the head proportions — which is most of the head and a fair chunk of the body.
+[**Frennec**](https://nattbat.gumroad.com/l/frennec) — free, full-body rig, ARKit face tracking, visemes and expressions.
 
-There are feline bases that ship with face tracking and Blender source, and at least one that ships a **lion** configuration outright:
+He's a fennec fox and Kaarten is a lion, but the conversion is smaller than it first looks, and the cub/teen direction shrinks it further:
+
+- **It's free.** If it doesn't work out you've lost an evening, not money.
+- **Fennec bases start small and cute** — less reproportioning to reach cub/teen than an adult feline base would need.
+- **The mane hides most of the argument.** Kaarten's rainbow mane wraps the whole skull and jawline, so fox-versus-lion head silhouette differences are largely covered.
+- **The ears are free to replace** (below), and they're the loudest fox cue on the model.
+- **The tail is new geometry regardless** — Kaarten needs a scaled, feathered dragon tail, which no feline base would have given you either.
+
+That leaves the **muzzle** as the only genuinely fox-shaped thing you must fix, and there's a clean technique for it below.
+
+<details>
+<summary>Feline bases, if Frennec doesn't work out</summary>
 
 | Base | Notes |
 |---|---|
-| [**Revit's Felines**](https://revit.gumroad.com/l/QHWXq) | 10 configurations including **Lion**, plus lynx, sabertooth, cheetah, snow leopard. Blender + Substance source. |
-| [**Winterpaw Feline**](https://juliawinterpaw.gumroad.com/l/Feline) | Supports **both Unified Expressions and ARKit**, 16 species textures, organised Substance/Photoshop files. |
-| [**Big Cat (2025)**](https://skip4d.gumroad.com/l/bigcat2025) | ARKit, 27 meshes built for fast Blender customisation. |
-| [**RoverCat**](https://rexrover.gumroad.com/l/RoverCat) | **Modular ears and tails**, 12 cat species. Modularity is a real advantage here. |
+| [Revit's Felines](https://revit.gumroad.com/l/QHWXq) | 10 configurations including **Lion**. Blender + Substance source. |
+| [Winterpaw Feline](https://juliawinterpaw.gumroad.com/l/Feline) | **Unified Expressions and ARKit**, 16 species textures. |
+| [Big Cat (2025)](https://skip4d.gumroad.com/l/bigcat2025) | ARKit, 27 meshes built for fast Blender customisation. |
+| [RoverCat](https://rexrover.gumroad.com/l/RoverCat) | Modular ears and tails, 12 species. |
 
-Starting from a lion means the muzzle, ears, paws and fur direction are already right, and you spend your time on *Kaarten* — the mane, horns, wings, tail, armour — rather than on undoing fox anatomy.
+</details>
 
-**The cuteness you like in Frennec is mostly proportion and face texture**, both of which you're redoing anyway. Worth an hour comparing before committing. If you still prefer Frennec's base afterwards, everything below applies.
+**Before sculpting anything:** confirm Frennec ships `.blend` source (not Unity-package-only), that the ARKit shapes are actually present in the shape key list, and that the licence permits heavy modification and public upload.
 
 ---
 
@@ -92,21 +103,79 @@ Mane, horns, wings, dragon tail, armour. No shape key interaction at all — mod
 
 ---
 
-## Cub proportions vs. full-body tracking
+## Cub/teen proportions — the spec
 
-A real tension, worth deciding deliberately.
+**Decision: Kaarten is a cub/teen.** This section is the build target.
 
-"Lion cub" implies **bigger head relative to body, shorter limbs, rounder features**. That is *exactly* the direction that makes FBT IK misbehave — short legs relative to torso is the specific thing that produces bad knee bends and floating hips.
+I flagged FBT as a risk earlier. Having looked at what actually breaks, the constraint is much narrower than "cub proportions are risky" — and everything that makes him read as young is on the safe side of it.
 
-Also worth flagging: the design sheet describes Kaarten as **"short, stout, muscular"** and a **"Noble Champion / Guardian"** — an adult-proportioned character who happens to be 138 cm, not a cub. Those are different silhouettes.
+### What's free, and what costs you
 
-Options:
+VRChat's IK maps your real limbs onto the avatar's. The thing that misbehaves is a **leg-length-to-height ratio** far from your own — that's what produces bad knee bends and floating hips. Nothing else about youthful proportion touches it.
 
-- **Cub face, adult-ish proportions** — round muzzle, big eyes, soft features on a stout compact body. Reads young and cute, keeps FBT sane. **Recommended**, and closest to the sheet.
-- **Full cub proportions** — commit to the chunky-limbed, big-headed look and accept that FBT will need careful calibration and may still look off in some poses.
-- **Cub v1, adult v2** — proportions are just vertex positions. With shape keys handled properly you can revisit this later.
+| Change | FBT impact | Verdict |
+|---|---|---|
+| **Bigger head relative to body** | None | **Free** — and it's the single strongest youth cue |
+| **Chunky, thick limbs** | None | **Free** |
+| **Short overall height (138 cm)** | None | **Free** |
+| **Large paws relative to limbs** | None | **Free** — already in the design sheet |
+| **Round torso, soft muscle definition** | None | **Free** |
+| **Short neck** | None | **Free** |
+| **Shortened legs relative to torso** | **This is the one** | Keep within the rule below |
 
-Worth deciding before Phase 1 block-out, since it sets the skeleton.
+So: get the youth from **head size, limb thickness, paw size and facial features** — all free — rather than from shortening the legs. You can land a genuinely cub-like read without ever approaching the constraint.
+
+### The one hard rule
+
+**Leg length (floor to hip joint) ≥ 44% of total height.**
+
+For reference: adult humans sit around 48–50%, a ten-year-old around 45%, a toddler around 36%. Below ~40% is where FBT visibly degrades.
+
+At 138 cm that means **hip joint at 61 cm or higher**. Comfortably compatible with a cub silhouette — real children clear it easily.
+
+### Target proportions
+
+| Measure | Target | Note |
+|---|---|---|
+| Total height | **138 cm** | From the design sheet |
+| Head height | **23–25 cm** | ≈ 5.5–6 heads tall. Adult is ~7.5; chibi is 2–3 |
+| Hip joint height | **62–66 cm** | **45–48% — the FBT-critical number** |
+| Torso, hip to shoulder | ~38–40 cm | Compact |
+| Neck | Short | Strong youth cue, costs nothing |
+| Shoulder width | ~1.6–1.8 head widths | Broad — keeps the sheet's "broad chest" |
+| Eye line | ~45% up the skull | Lower than adult (~50%). Big youth cue |
+| Muzzle | Short and blunt | Works in your favour — lion cubs have short muzzles |
+| Paws | Large relative to limbs | Already specified on the sheet |
+
+5.5–6 heads is the sweet spot: unmistakably young, still functional in VR. Below 5 heads you start fighting both FBT and world interaction heights.
+
+### Cub/teen anatomy for the sculpt
+
+- Larger cranium, more prominent forehead, smaller face within the skull
+- Eyes larger and set **lower**; nose small; cheeks round and full
+- Muzzle short and blunt rather than long and tapered
+- Shorter neck, sloping into the shoulders
+- Softer muscle transitions — suggest strength through bulk, not definition
+- Rounder torso with minimal waist taper
+- Limbs shorter and **thicker**; joints less defined
+- Paws and hands oversized — one of the most effective and cheapest youth cues
+
+### Note on the design sheet
+
+The sheet says **"muscular"** and describes a "Noble Champion / Guardian." Cub/teen and defined musculature pull against each other. The resolution that keeps both readings: **bulk without definition** — broad chest, thick limbs, powerful stance, but soft rounded transitions instead of visible muscle separation. Reads as a sturdy, powerful young lion rather than a bodybuilder.
+
+Worth updating the sheet's build line to match once you've settled the look.
+
+### Test the skeleton before you sculpt
+
+The cheapest hour in this project:
+
+1. Reproportion the **armature only** — scale the head bone up, shorten and thicken the limb bones, set hip height.
+2. Export, upload as a private test avatar.
+3. Stand in it with your trackers on. Walk, crouch, sit, look in a mirror.
+4. Adjust and repeat.
+
+Proportions are the one decision that's expensive to change after sculpting and nearly free to change before. Get the skeleton feeling right in-headset first, then sculpt the mesh onto it.
 
 ---
 
@@ -140,12 +209,16 @@ Cheap, catches everything:
 
 ## Order of work
 
-1. Decide base — Frennec or a feline base. **Do this before anything else.**
-2. Decide cub-vs-stout proportions.
-3. Upload the unmodified base as a private test avatar; confirm FT and FBT work end to end.
-4. Ears — delete and remodel. Easy win, immediate visual payoff, zero risk.
-5. Body and limb proportions — Basis + Propagate to Shapes.
-6. Muzzle and eyes — Lattice + apply-across-keys. Verify shapes.
-7. New geometry — mane, horns, tail, wings.
-8. Retexture.
-9. Armour.
+Base and proportions are both settled — Frennec, cub/teen. Start at step 1.
+
+1. **Verify Frennec's files** — `.blend` source present, ARKit shapes in the list, licence allows modification.
+2. **Upload it unmodified** as a private test avatar. Confirm face tracking and FBT work end to end on your hardware, before any art investment.
+3. **Reproportion the armature only** to the cub/teen spec above. Upload again, stand in it with trackers, adjust until it feels right. Cheapest hour in the project.
+4. **Ears** — delete and remodel as a separate object. Easy win, immediate visual payoff, zero risk to the rig.
+5. **Body and limb proportions** — Basis edit + `Propagate to Shapes`.
+6. **Muzzle and eyes** — Lattice + apply-across-all-shape-keys. Verify every shape afterwards.
+7. **New geometry** — mane, horns, tail, wings, as separate objects.
+8. **Retexture** to Kaarten's palette.
+9. **Armour.**
+
+Steps 1–4 are a weekend and get you a recognisably young lion in VRChat with working face tracking. That's the milestone worth aiming at first.

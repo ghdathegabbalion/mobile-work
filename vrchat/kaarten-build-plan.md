@@ -19,7 +19,8 @@ From the design sheet.
 | Species | Lion (feline) / Dragonborn |
 | Role | Noble Champion / Guardian |
 | Height | **138 cm (4'6")** — short, against a 180 cm human reference |
-| Build | Short, stout, muscular — broad chest, thick limbs, large hands/feet |
+| Build | **Cub/teen** — ~5.5–6 heads tall, broad chest, thick limbs, oversized paws. Bulk without muscle definition (see fast-path proportion spec) |
+| Base | [Frennec](https://nattbat.gumroad.com/l/frennec) — free, ARKit + full-body rig, converted to lion |
 | Personality | Bold, loyal, charismatic |
 | Fur | Tan base, cream accent. Short on body, longer at trim |
 | Mane | Full rainbow — red, orange, yellow, green, blue, purple, magenta, cyan — with flower and gem ornaments |
@@ -229,8 +230,11 @@ Recommend physics as the base with 2–3 expression poses layered on top.
 
 FBT and Kaarten's proportions are in direct tension. Worth understanding before Phase 1, because it constrains the block-out.
 
-- **VRChat's IK maps your real proportions onto the avatar.** You're presumably not 138 cm with a 4'6" stout build, so every offset is large. Short avatars with tall users produce odd knee bends and floating-hip artefacts.
-- **Don't over-stylise the leg-to-torso ratio.** Stout and thick-limbed is fine. Very short legs relative to torso is where FBT IK visibly breaks. Keep leg length within a plausible fraction of total height even while the limbs are chunky.
+**Kaarten is cub/teen proportioned — see the [proportion spec](frennec-to-kaarten.md#cubteen-proportions--the-spec) for the target numbers.** The constraint is narrower than it first appears: big head, thick limbs, short stature and oversized paws are all free. Only one measure matters.
+
+- **Hard rule: leg length (floor to hip joint) ≥ 44% of total height** — at 138 cm, hip joint at 61 cm or higher. Adults sit at 48–50%, a ten-year-old at ~45%, a toddler at ~36%. Below 40% is where FBT visibly degrades.
+- **VRChat's IK maps your real proportions onto the avatar.** The larger the mismatch in *leg ratio* specifically, the worse the knee bends and hip float. Overall height difference is fine.
+- **Get the youth from head size, limb thickness and paw size** — none of which touch IK — rather than from shortening the legs.
 - **Hip bone placement is critical** — more so than for desktop or 3-point. Get it anatomically sensible, centred, at true hip height.
 - **Clean T-pose and correct bone rolls.** FBT amplifies every rigging sloppiness.
 - **Thick limbs deform worse than thin ones.** Elbows, knees, shoulders and hips need extra weight-painting attention, and possibly corrective blendshapes driven by joint angle.
@@ -336,7 +340,7 @@ The phase your tracking requirements have tripled. Build in the layer order from
 7. **Per-column PhysBone components on the cape.** One component on the root.
 8. **Alpha-blend on layered feathers.** Sorting artefacts. Use cutout.
 9. **PBR metallic for the gold.** Muddy grey under toon. MatCap.
-10. **Over-stylised leg-to-torso ratio.** FBT IK breaks visibly.
+10. **Legs under 44% of total height.** The one proportion that breaks FBT — everything else about cub proportions is free.
 11. **Wrong scale.** Build at 138 cm; View Position at eye height.
 12. **Skipping eye bones.** Camera-based eye tracking makes them fully driven — build them properly.
 13. **Warped UVs under the checker pattern.** Instantly visible.
