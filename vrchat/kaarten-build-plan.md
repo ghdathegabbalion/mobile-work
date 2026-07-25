@@ -6,6 +6,8 @@
 **Platform:** PC (primary) + Quest/Android variant
 **Tracking:** Valve Index — full-body tracking, plus face tracking via add-on
 
+> **Working to a schedule? Start with [`kaarten-fast-path.md`](kaarten-fast-path.md)** — the same avatar in ~150 hrs instead of 350–500, by starting from a face-tracking-ready base and letting tooling do the Unity side. This document remains the reference for every constraint and technique; the fast path is the plan to actually execute.
+
 ---
 
 ## 1. Character spec
