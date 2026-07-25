@@ -1,5 +1,7 @@
 # Kaarten — design sheet
 
+Reference sheet: `ref/kaarten-ref.png`. To render on the PC, see `RUN-ON-PC.md`.
+
 Anthropomorphic feline-dragon cub wizard. Storybook-fantasy anime illustration, ornate and jewel-toned.
 
 ## Design traits (keep these locked)

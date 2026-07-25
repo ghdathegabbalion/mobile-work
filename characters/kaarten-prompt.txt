@@ -1,0 +1,24 @@
+masterpiece, best quality, highly detailed, full body, solo, front view,
+anthro feline dragon cub, young, small round build, tan fur, faint spots, freckled muzzle,
+tufted cheek fur, large round emerald green eyes, gentle closed-mouth smile,
+shaggy rainbow gradient hair, (red orange crown fading to green teal blue tips:1.2),
+small red membranous bat dragon wings, gold-plated wing bones,
+long serpentine dragon tail, iridescent rainbow scales, plumed red and gold tail fan,
+(enormous wide-brimmed golden wizard hat:1.3), quilted, gold star embroidery, constellation stitching,
+jewelled hat band, red green gold feathers, purple crystals in the brim, tall crown flopping to one side,
+(royal blue robe lined in cream:1.2), gold filigree stars, constellation embroidery, long sweeping train,
+bare chest, (large faceted emerald heart gem:1.3), layered gold chains, amethyst and ruby settings,
+cream ruffled cuffs, gold pauldrons, ornate jewelled gold belt,
+(green and white vertical striped puffed pantaloons:1.3), gold trim,
+clawed paw feet, gold jewelled sandal greaves,
+one hand raised palm up with glowing arcane sigil,
+(tall gold staff topped with a purple orb:1.2),
+enchanted crystal library, deep indigo night background, (vast glowing gold arcane circle:1.2),
+bookshelves, ancient tomes, floating faceted crystals, hanging pendant gems on gold chains,
+lit candles, open spellbook, glass orb,
+candlelight, magical glow, bokeh sparkles, mirror-polished reflective floor,
+jewel tones, gold sapphire emerald amethyst, ornate, opulent, storybook fantasy,
+crisp linework, painterly shading, intricate detail
+
+# Flux dev: ignore the weights above and use the prose prompt in kaarten.md instead —
+# Flux responds much better to natural-language sentences than to tag soup.
