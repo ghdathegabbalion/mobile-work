@@ -148,18 +148,39 @@ Axis-aligned UV islands, generous texel density. Warped UVs make the checks wobb
 
 You asked for moving eyes, eyelids, mouth, and ears. Here's what each actually needs, and the hardware reality.
 
-### Hardware reality on Index — read this first
+### Hardware on Index — all of it is achievable
 
-| Feature | On your Index | Notes |
+The Index has no *native* eye tracking, but camera-based add-ons solve this completely. You do not need a new headset.
+
+| Feature | On your Index | Route |
 |---|---|---|
-| **Mouth / jaw / tongue tracking** | ✅ with **Vive Facial Tracker** | USB add-on that clips to the front of the Index. This is the one that gives you real mouth tracking. |
-| **Eye tracking** | ❌ not available | The Index has no native eye tracking, and the aftermarket add-on (Droolon Pi1) is discontinued and was never reliable. |
-| **Eye movement anyway** | ✅ built-in | VRChat's **Eye Look** moves eyes and blinks procedurally with no hardware at all. |
-| **Full-body tracking** | ✅ | Vive or Tundra trackers + base stations. |
+| **Eye tracking** | ✅ | **EyeTrackVR** — IR cameras mounted inside the headset, watching your pupils |
+| **Mouth / jaw / tongue** | ✅ | **Project Babble** (camera, open-source) or the Vive Facial Tracker |
+| **Eyelids / blinking** | ✅ | Comes with eye tracking; Eye Look is the no-hardware fallback |
+| **Full-body tracking** | ✅ | Vive or Tundra trackers + base stations |
 
-So: **your eyes will move, and your eyelids will blink, but they won't follow your real gaze.** Everything else — jaw, lips, tongue, cheeks — tracks for real with the Facial Tracker.
+### Camera-based tracking options
 
-**Build the eye bones and the full eye shape set regardless.** If you later move to a Bigscreen Beyond 2e or Quest Pro, real eye tracking then works with zero rework. Skipping them now means redoing Phase 6 later.
+Both work by pointing small IR cameras at your eyes and mouth inside the headset, then feeding the data to VRChat over OSC.
+
+**Eye tracking — [EyeTrackVR](https://github.com/Project-Babble/ProjectBabble)**
+Open-source, self-contained, modular. Two small IR cameras plus IR illumination inside the headset gasket, watching pupils and eyelids; software estimates gaze and sends it over OSC. Built largely *for* social VR — VRChat avatar eyes are its main use case.
+- [**IndexEyeTrackVR**](https://github.com/rrazgriz/IndexEyeTrackVR) — an Index-specific hardware/software repo with mounts designed for your exact headset.
+
+**Mouth tracking — [Project Babble](https://new.babble.diy/)**
+Open-source lower-face tracking, hardware-agnostic, works on any PCVR headset. Tracks 45+ facial expressions. Speaks OSC and integrates directly with **VRCFaceTracking and Unified Expressions**. An official pre-built module is ~$100 USD.
+
+Babble is worth preferring over the Vive Facial Tracker: comparable results, actively developed, and far easier to source.
+
+**If you'd rather not DIY:** [FaceFocusVR](https://shop.facefocusvr.com/products/full-face-eye-tracking-kit-for-valve-index) sells a combined face + eye tracking kit built specifically for the Valve Index — no soldering, no USB hub mess. Costs more than sourcing parts yourself; saves a weekend of assembly and troubleshooting.
+
+⚠️ **On DIY IR near your eyes:** use the documented parts and current limits from the project. The designs are built around eye-safe IR levels — don't improvise brighter LEDs or substitute unspecified emitters. Commercial kits handle this for you.
+
+### Why this doesn't change the avatar work
+
+All of these feed the same software layer — **VRCFaceTracking**, speaking **Unified Expressions**. So whichever hardware you land on, the blendshapes you author are identical. Build the full Unified Expressions set and every option above drives it correctly, including anything you upgrade to later.
+
+Practical consequence: **build the eye bones and the full eye shape set.** They will actually be driven.
 
 ### What to author
 
@@ -297,7 +318,7 @@ The phase your tracking requirements have tripled. Build in the layer order from
 | Realistic time, this design + face tracking + FBT + Quest | **350–500 hrs** |
 | Where the time goes | retopo, weight painting, the cape, the FT blendshape set |
 | Software cost | £0 — Blender, Unity, VCC, lilToon, VRCFaceTracking all free |
-| Hardware needed | **Vive Facial Tracker** for mouth tracking; trackers + base stations for FBT |
+| Hardware needed | Eye tracking (EyeTrackVR / kit) + mouth tracking (Project Babble ~$100) + trackers & base stations for FBT |
 | Optional | Substance Painter subscription |
 
 ---
@@ -315,14 +336,15 @@ The phase your tracking requirements have tripled. Build in the layer order from
 9. **PBR metallic for the gold.** Muddy grey under toon. MatCap.
 10. **Over-stylised leg-to-torso ratio.** FBT IK breaks visibly.
 11. **Wrong scale.** Build at 138 cm; View Position at eye height.
-12. **Skipping eye bones** because the Index can't drive them. Build them for the upgrade path.
+12. **Skipping eye bones.** Camera-based eye tracking makes them fully driven — build them properly.
 13. **Warped UVs under the checker pattern.** Instantly visible.
 
 ---
 
 ## 11. Next actions
 
-- [ ] Confirm whether you have the **Vive Facial Tracker** — without it, mouth tracking isn't possible on Index
+- [ ] Pick the tracking hardware route: DIY (EyeTrackVR + Project Babble) or a prebuilt Index kit (FaceFocusVR)
+- [ ] Order it early — assembly and calibration are their own project, best done while modelling rather than at the end
 - [ ] Choose the shape set: **Unified Expressions** (recommended) or ARKit 52
 - [ ] Extract front/side ortho panels from the design sheet as Blender backgrounds
 - [ ] Start Phase 1 block-out at true 138 cm scale, checking the FBT leg-ratio constraint
