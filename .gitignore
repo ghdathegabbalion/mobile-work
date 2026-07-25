@@ -1,0 +1,33 @@
+# OS cruft
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Secrets / env — never commit
+.env
+.env.*
+*.key
+*.pem
+*.token
+secrets/
+
+# Editors
+.vscode/
+.idea/
+
+# Model weights & large media — reference C:\Users\GH-DA\ComfyUI-Shared instead
+*.safetensors
+*.ckpt
+*.gguf
+*.pt
+*.pth
+*.bin
+*.mp4
+*.mov
+*.zip
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
