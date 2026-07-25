@@ -30,7 +30,9 @@ IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
 THUMB_DIR = Path(tempfile.gettempdir()) / "comfy-gallery-thumbs"
 
 CANDIDATE_DIRS = [
+    "~/Documents/ComfyUI/output",  # ComfyUI Desktop's default
     r"C:\Users\GH-DA\ComfyUI-Shared\output",
+    r"C:\Users\GH-DA\ComfyUI-Installs\ComfyUI\ComfyUI\output",
     r"C:\Users\GH-DA\ComfyUI\output",
     "~/ComfyUI/output",
     "./output",
@@ -47,15 +49,31 @@ except Exception:
 # ---------------------------------------------------------------- output dir
 
 
+def newest_image_mtime(root):
+    newest = 0.0
+    for path in root.rglob("*"):
+        if path.suffix.lower() in IMAGE_SUFFIXES and path.is_file():
+            try:
+                newest = max(newest, path.stat().st_mtime)
+            except OSError:
+                pass
+    return newest
+
+
 def detect_output_dir():
+    """Pick the candidate holding the most recent render.
+
+    A machine can easily carry several ComfyUI installs, and picking the first
+    folder that merely exists lands on an empty one. Freshest content wins.
+    """
     env = os.environ.get("COMFY_OUTPUT")
     if env:
         return Path(env).expanduser()
-    for cand in CANDIDATE_DIRS:
-        p = Path(cand).expanduser()
-        if p.is_dir():
-            return p
-    return None
+    existing = [p for p in (Path(c).expanduser() for c in CANDIDATE_DIRS) if p.is_dir()]
+    if not existing:
+        return None
+    best = max(existing, key=newest_image_mtime)
+    return best if newest_image_mtime(best) else existing[0]
 
 
 def list_images(root, limit=300):

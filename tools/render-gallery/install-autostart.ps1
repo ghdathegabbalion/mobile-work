@@ -52,7 +52,10 @@ function Test-Pillow([string]$exe) {
 $candidates = @()
 if ($Python) { $candidates += $Python }
 $candidates += @(
+    "$env:USERPROFILE\Documents\ComfyUI\.venv\Scripts\python.exe",   # ComfyUI Desktop
+    "$env:USERPROFILE\Documents\ComfyUI\venv\Scripts\python.exe",
     "$env:USERPROFILE\ComfyUI-Shared\venv\Scripts\python.exe",
+    "$env:USERPROFILE\ComfyUI-Installs\ComfyUI\ComfyUI\.venv\Scripts\python.exe",
     "$env:USERPROFILE\ComfyUI\venv\Scripts\python.exe",
     "$env:USERPROFILE\ComfyUI\.venv\Scripts\python.exe",
     "$env:USERPROFILE\ComfyUI_windows_portable\python_embeded\python.exe"
@@ -74,6 +77,10 @@ if (-not (Test-Path $pyw)) { $pyw = $chosen }
 
 Write-Host "Python     : $chosen"
 Write-Host "Thumbnails : $(if ($hasPillow) {'Pillow (fast)'} else {'off - full images will be sent'})"
+if (-not $hasPillow) {
+    Write-Host "  For fast thumbnails:  & `"$chosen`" -m pip install pillow" -ForegroundColor Yellow
+    Write-Host "  then re-run this script." -ForegroundColor Yellow
+}
 
 # --- register the task -------------------------------------------------------
 $argLine = "`"$script`" --port $Port --log `"$logFile`""
