@@ -20,6 +20,7 @@ import socket
 import struct
 import sys
 import tempfile
+import time
 import urllib.parse
 import zlib
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -495,7 +496,14 @@ def main():
     ap.add_argument("--dir", help="ComfyUI output folder (default: auto-detect)")
     ap.add_argument("--port", type=int, default=8777)
     ap.add_argument("--host", default="0.0.0.0", help="default 0.0.0.0 so the phone can reach it")
+    ap.add_argument("--log", help="append output here (autostart runs with no console)")
     args = ap.parse_args()
+
+    if args.log:
+        # pythonw.exe has no console, so without this a crash leaves no trace.
+        stream = open(args.log, "a", buffering=1, encoding="utf-8", errors="replace")
+        sys.stdout = sys.stderr = stream
+        print(f"\n--- started {time.strftime('%Y-%m-%d %H:%M:%S')} ---")
 
     root = Path(args.dir).expanduser() if args.dir else detect_output_dir()
     if not root or not root.is_dir():

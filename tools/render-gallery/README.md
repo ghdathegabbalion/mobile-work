@@ -21,6 +21,28 @@ other common spots. Override with `--dir <path>` or `set COMFY_OUTPUT=<path>`.
 On start it prints the URLs that will work from the phone; the `100.x.x.x` one is
 Tailscale. It binds `0.0.0.0` so the tailnet can reach it.
 
+## Autostart (do this once, then forget it)
+
+Starting the server by hand every time defeats the point of a home-screen icon.
+This registers a scheduled task that launches it at logon, windowless:
+
+```
+powershell -ExecutionPolicy Bypass -File install-autostart.ps1
+```
+
+It picks a Python that can import Pillow (ComfyUI's own, if it can find it) so the
+phone gets thumbnails, registers the task, opens the firewall port if the shell is
+elevated, starts it, and then confirms the server actually answers before printing
+the URL to open on the phone.
+
+- `-Port 8777`, `-OutputDir <path>`, `-Python <path to python.exe>` to override
+- `-Uninstall` removes the task and the firewall rule
+- Logs to `gallery.log` next to the script — check there first if the icon opens
+  to nothing, since a windowless task has nowhere else to complain
+
+If the phone can't connect but `http://localhost:8777` works on the PC, it's the
+firewall: re-run the install from an **admin** PowerShell.
+
 ## Pin it to the home screen
 
 Open the Tailscale URL on the phone, then:
