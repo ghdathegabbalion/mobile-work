@@ -6,10 +6,14 @@
   "//backend": "auto tries http, then cli, then the built-in stub. Force one with http | cli | echo.",
   "backend": "auto",
 
-  "//http": "Use this if Aster already listens on a port.",
+  "//asterUrl": "Aster's own web UI. On startup its page is read (never POSTed to)",
+  "//asterUrl2": "to find the endpoint its front end talks to, so http.url can stay null.",
+  "asterUrl": "http://127.0.0.1:8787",
+
+  "//http": "Use this if Aster listens on a port. Setting url skips discovery.",
   "http": {
     "url": null,
-    "//url": "e.g. http://127.0.0.1:9000/chat, or .../v1/chat/completions",
+    "//url": "e.g. http://127.0.0.1:8787/api/chat, or .../v1/chat/completions",
     "//style": "auto picks openai for a chat/completions URL, else simple.",
     "//style2": "openai -> {model, messages:[...]}, reads choices[0].message.content",
     "//style3": "simple -> {message, system, history:[{role,text}]}, reads reply/text/content/response",

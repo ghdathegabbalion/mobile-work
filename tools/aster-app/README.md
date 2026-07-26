@@ -30,18 +30,40 @@ output folder is, and which Aster files it found.
 
 ## Wiring Aster's chat backend
 
-The render half needs no setup. The chat half has to be pointed at whatever Aster
-actually is, and there are three ways:
+The render half needs no setup, and usually the chat half doesn't either.
+
+**Discovery.** On startup the app fetches Aster's own web UI —
+`http://127.0.0.1:8787` by default, `asterUrl` or `--aster` to change it — reads
+the calls its front end makes, and wires itself to the chat-looking one. It only
+*reads*; it never POSTs to an endpoint while probing, since guessing at unknown
+routes could trip something with side effects. `--probe` lists everything it
+found and which one it picked:
+
+```
+aster web UI: http://127.0.0.1:8787
+  answered   : yes  - Aster
+  calls its page makes (best guess first):
+    [fetch] http://127.0.0.1:8787/api/chat
+    [fetch] http://127.0.0.1:8787/api/health
+  chat endpoint: http://127.0.0.1:8787/api/chat
+```
+
+Discovery follows same-origin `<script src>` bundles too, so an endpoint that
+only appears in `app.js` is still found. If it picks wrong, or Aster streams over
+SSE/WebSocket (which this backend can't speak yet — it says so rather than
+mis-wiring), set `http.url` explicitly and discovery is skipped.
+
+The three backends, in the order `auto` tries them:
 
 | backend | when | set |
 |---|---|---|
-| `http` | Aster already listens on a port | `http.url` |
+| `http` | Aster listens on a port | `http.url`, or let discovery find it |
 | `cli`  | Aster is a command you run | `cli.command` |
-| `echo` | nothing wired up yet | — (the default fallback) |
+| `echo` | nothing wired up yet | — (the fallback) |
 
-Copy `aster.config.example.json` to `aster.config.json` and edit. Both backends
-get the system prompt, the conversation so far, and the new message; both just
-need to hand back text.
+Copy `aster.config.example.json` to `aster.config.json` and edit. Both real
+backends get the system prompt, the conversation so far, and the new message;
+both just need to hand back text.
 
 - **`http`** — `style: "openai"` posts `{model, messages:[…]}` and reads
   `choices[0].message.content`, so anything OpenAI-shaped works as-is.

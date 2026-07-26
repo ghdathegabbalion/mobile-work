@@ -111,8 +111,11 @@ except Exception:
 DEFAULT_CONFIG = {
     "backend": "auto",  # auto | http | cli | echo
     "systemPrompt": None,  # None -> DEFAULT_SYSTEM (+ design sheet, if found)
+    # Aster's own web UI. Its page gets scraped for the endpoint it posts to,
+    # so http.url can usually stay null.
+    "asterUrl": "http://127.0.0.1:8787",
     "http": {
-        "url": None,  # e.g. http://127.0.0.1:9000/v1/chat/completions
+        "url": None,  # set to skip discovery, e.g. http://127.0.0.1:8787/chat
         "style": "auto",  # auto | openai | simple
         "model": "aster",
         "headers": {},
@@ -223,6 +226,105 @@ def render_history(history, turns):
         if text:
             lines.append(f"{who}: {text}")
     return "\n\n".join(lines)
+
+
+# ------------------------------------------------------ discovering Aster
+#
+# Read-only: fetch Aster's own page, read the calls its front end makes, and
+# report them. This never POSTs anything while probing - guessing at unknown
+# endpoints could trip something with side effects.
+
+CALL_RES = [
+    ("fetch", re.compile(r"""(?:fetch|axios\.\w+|\$\.(?:post|get|ajax))\s*\(\s*['"`]([^'"`\s]+)""")),
+    ("ws", re.compile(r"""new\s+WebSocket\s*\(\s*['"`]([^'"`\s]+)""")),
+    ("sse", re.compile(r"""new\s+EventSource\s*\(\s*['"`]([^'"`\s]+)""")),
+]
+SCRIPT_SRC_RE = re.compile(r"""<script[^>]+src\s*=\s*['"]([^'"]+)['"]""", re.I)
+TITLE_RE = re.compile(r"<title[^>]*>(.*?)</title>", re.I | re.S)
+ASSET_SUFFIXES = (".js", ".css", ".png", ".jpg", ".svg", ".ico", ".webmanifest", ".map", ".woff", ".woff2")
+# Endpoint names that look like "this is where the chat goes".
+CHATTY = ("chat", "message", "msg", "send", "ask", "say", "prompt", "completion", "talk", "reply")
+
+
+def _fetch_text(url, timeout=4, limit=800_000):
+    req = urllib.request.Request(url, headers={"User-Agent": "aster-app/probe"})
+    with local_opener().open(req, timeout=timeout) as resp:
+        ctype = resp.headers.get("Content-Type", "")
+        return resp.read(limit).decode("utf-8", "replace"), ctype
+
+
+def discover_aster(base, timeout=4):
+    """Scrape Aster's web UI for the endpoint it talks to.
+
+    Returns {"base", "ok", "title", "error", "candidates": [{url, kind, hint}]}.
+    """
+    base = (base or "").rstrip("/")
+    out = {"base": base, "ok": False, "title": None, "error": None, "candidates": []}
+    if not base:
+        out["error"] = "no asterUrl configured"
+        return out
+
+    try:
+        page, _ = _fetch_text(base + "/", timeout)
+    except Exception as exc:
+        out["error"] = f"{exc}"
+        return out
+    out["ok"] = True
+    title = TITLE_RE.search(page)
+    if title:
+        out["title"] = " ".join(title.group(1).split())[:60]
+
+    # Bounded overall: the app autostarts at logon and must not hang here if
+    # Aster is up but wedged.
+    deadline = time.monotonic() + 3 * timeout
+    sources = [page]
+    for src in SCRIPT_SRC_RE.findall(page)[:6]:
+        if time.monotonic() > deadline:
+            break
+        if src.startswith(("http://", "https://")) and not src.startswith(base):
+            continue  # same-origin only; a CDN bundle isn't Aster's API
+        try:
+            body, _ = _fetch_text(urllib.parse.urljoin(base + "/", src), timeout)
+            sources.append(body)
+        except Exception:
+            continue
+
+    seen = set()
+    for body in sources:
+        for kind, pattern in CALL_RES:
+            for raw in pattern.findall(body):
+                if "${" in raw or raw.startswith(("data:", "blob:")):
+                    continue
+                url = urllib.parse.urljoin(base + "/", raw)
+                if not url.startswith(("http://", "https://", "ws://", "wss://")):
+                    continue
+                path = urllib.parse.urlparse(url).path
+                if path.lower().endswith(ASSET_SUFFIXES):
+                    continue
+                if url in seen:
+                    continue
+                seen.add(url)
+                out["candidates"].append({"url": url, "kind": kind, "path": path})
+
+    # Most chat-looking first, so the top entry is the one worth wiring.
+    def rank(cand):
+        low = cand["path"].lower()
+        return (
+            0 if any(w in low for w in CHATTY) else 1,
+            0 if cand["kind"] == "fetch" else 1,
+            len(low),
+        )
+
+    out["candidates"].sort(key=rank)
+    return out
+
+
+def best_chat_endpoint(found):
+    """The one candidate worth auto-wiring, or None if it's ambiguous."""
+    for cand in found.get("candidates") or []:
+        if cand["kind"] == "fetch" and any(w in cand["path"].lower() for w in CHATTY):
+            return cand
+    return None
 
 
 class EchoBackend:
@@ -426,6 +528,25 @@ class CliBackend:
         )
 
 
+def describe_discovery(found):
+    """One line on why discovery didn't produce a usable endpoint."""
+    if not found.get("ok"):
+        return f"nothing answering at {found['base']} ({found.get('error')})"
+    cands = found.get("candidates") or []
+    if not cands:
+        return f"{found['base']} answered but its page makes no visible API calls"
+    kinds = {c["kind"] for c in cands}
+    if kinds <= {"ws", "sse"}:
+        return (
+            f"{found['base']} streams over {'/'.join(sorted(kinds))} "
+            f"({cands[0]['path']}) - this backend only speaks single-shot JSON"
+        )
+    return (
+        f"{found['base']} has no obviously chat-shaped endpoint; "
+        f"closest is {cands[0]['path']} - set http.url to pick one"
+    )
+
+
 def detect_claude_cli():
     """Find the Claude Code CLI, including the MSIX path SSH sessions land on."""
     found = shutil.which("claude") or shutil.which("claude.cmd")
@@ -456,7 +577,15 @@ def build_backend(config, system):
         try:
             if kind == "http":
                 if not (config["http"].get("url") or "").strip():
-                    notes.append("http: no url configured")
+                    # Nothing configured: ask Aster's own page where it posts.
+                    found = discover_aster(config.get("asterUrl"))
+                    best = best_chat_endpoint(found)
+                    if best:
+                        config = deep_merge(config, {"http": {"url": best["url"]}})
+                        backend = HttpBackend(config, system)
+                        backend.detail += "  [discovered]"
+                        return backend, notes
+                    notes.append(f"http: {describe_discovery(found)}")
                     continue
                 return HttpBackend(config, system), notes
             if kind == "cli":
@@ -1777,6 +1906,8 @@ class App:
 
         if args.comfy:
             self.config["comfy"]["url"] = args.comfy
+        if getattr(args, "aster", None):
+            self.config["asterUrl"] = args.aster
         if args.backend:
             self.config["backend"] = args.backend
 
@@ -1890,6 +2021,22 @@ def probe(app):
         print("  -> no real Aster wired up. Set http.url or cli.command in")
         print("     aster.config.json (copy aster.config.example.json).")
 
+    found = discover_aster(app.config.get("asterUrl"))
+    print(f"\naster web UI: {found['base']}")
+    if found["ok"]:
+        print(f"  answered   : yes{'  - ' + found['title'] if found['title'] else ''}")
+        if found["candidates"]:
+            print("  calls its page makes (best guess first):")
+            for cand in found["candidates"][:8]:
+                print(f"    [{cand['kind']:5}] {cand['url']}")
+            best = best_chat_endpoint(found)
+            print(f"  chat endpoint: {best['url'] if best else 'ambiguous - set http.url yourself'}")
+        else:
+            print("  no API calls visible in the page or its scripts")
+    else:
+        print(f"  answered   : no ({found['error']})")
+    print()
+
     claude = detect_claude_cli()
     print(f"claude CLI  : {' '.join(claude) if claude else 'not found on PATH'}")
 
@@ -1922,6 +2069,7 @@ def main():
     ap.add_argument("--host", default="0.0.0.0", help="default 0.0.0.0 so the phone can reach it")
     ap.add_argument("--dir", help="ComfyUI output folder (default: auto-detect)")
     ap.add_argument("--comfy", help="ComfyUI base URL (default http://127.0.0.1:8000)")
+    ap.add_argument("--aster", help="Aster's web UI (default http://127.0.0.1:8787)")
     ap.add_argument("--backend", choices=["auto", "http", "cli", "echo"])
     ap.add_argument("--token", help="shared secret (default: generated into aster.token)")
     ap.add_argument("--no-token", action="store_true", help="serve with no auth at all")
