@@ -175,7 +175,7 @@ Open-source lower-face tracking, hardware-agnostic, works on any PCVR headset. T
 
 Babble is worth preferring over the Vive Facial Tracker: comparable results, actively developed, and far easier to source.
 
-**If you'd rather not DIY:** [FaceFocusVR](https://shop.facefocusvr.com/products/full-face-eye-tracking-kit-for-valve-index) sells a combined face + eye tracking kit built specifically for the Valve Index — no soldering, no USB hub mess. Costs more than sourcing parts yourself; saves a weekend of assembly and troubleshooting.
+**If you'd rather not DIY:** [FaceFocusVR](https://shop.facefocusvr.com/products/face-eye-tracking-diy-kit-for-valve-index) sells a combined face + eye tracking kit built specifically for the Valve Index — no soldering, no USB hub mess. Costs more than sourcing parts yourself; saves a weekend of assembly and troubleshooting.
 
 ⚠️ **On DIY IR near your eyes:** use the documented parts and current limits from the project. The designs are built around eye-safe IR levels — don't improvise brighter LEDs or substitute unspecified emitters. Commercial kits handle this for you.
 
