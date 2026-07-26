@@ -25,3 +25,10 @@ The real art workspace lives at `C:\Users\GH-DA\ComfyUI-Shared`:
 - Workflows: `ComfyUI-Shared\workflows\*.json`
 - Character / design recipes: `ComfyUI-Shared\training\` (e.g. the Aster design sheet)
 - Prefer the `comfyui` MCP tools (`generate_image`, `img2img`, `inpaint`, `upscale_image`, `list_models`). ComfyUI runs on **port 8000** — verify it's up (GET /system_stats) before assuming.
+
+## Phone-facing tools (they run on the PC, you reach them from the phone)
+
+Both are stdlib-only Python servers, pinned to the phone home screen over Tailscale:
+
+- `tools/aster-app/` — chat with Aster + queue renders + gallery. Aster's chat backend is pluggable; `python server.py --probe` reports what it actually resolved. Read its README before changing it.
+- `tools/render-gallery/` — read-only grid of ComfyUI's output folder.

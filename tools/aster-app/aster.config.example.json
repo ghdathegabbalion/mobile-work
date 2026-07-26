@@ -1,0 +1,60 @@
+{
+  "//": "Copy to aster.config.json and edit. Every key is optional - the app",
+  "//2": "auto-detects a working setup and `python server.py --probe` tells you",
+  "//3": "what it found. aster.config.json is gitignored.",
+
+  "//backend": "auto tries http, then cli, then the built-in stub. Force one with http | cli | echo.",
+  "backend": "auto",
+
+  "//http": "Use this if Aster already listens on a port.",
+  "http": {
+    "url": null,
+    "//url": "e.g. http://127.0.0.1:9000/chat, or .../v1/chat/completions",
+    "//style": "auto picks openai for a chat/completions URL, else simple.",
+    "//style2": "openai -> {model, messages:[...]}, reads choices[0].message.content",
+    "//style3": "simple -> {message, system, history:[{role,text}]}, reads reply/text/content/response",
+    "style": "auto",
+    "model": "aster",
+    "headers": {},
+    "timeoutSeconds": 300
+  },
+
+  "//cli": "Use this if Aster is a command. The composed prompt goes in on stdin,",
+  "//cli2": "the reply is read off stdout. null command auto-detects the Claude Code CLI.",
+  "cli": {
+    "command": null,
+    "//command": "e.g. [\"claude\", \"-p\"]  or  [\"python\", \"C:\\\\Users\\\\GH-DA\\\\aster\\\\aster.py\"]",
+    "cwd": null,
+    "includeHistory": true,
+    "historyTurns": 12,
+    "timeoutSeconds": 300
+  },
+
+  "//systemPrompt": "Who Aster is. null uses the built-in one. The design sheet below",
+  "//systemPrompt2": "is appended automatically, as is the render protocol when ComfyUI is up.",
+  "systemPrompt": null,
+
+  "comfy": {
+    "url": "http://127.0.0.1:8000",
+    "//model": "null picks the first anime/illustration SDXL checkpoint ComfyUI reports.",
+    "model": null,
+    "outputPrefix": "aster/Aster",
+    "//workflow": "null uses the built-in SDXL text-to-image graph. For Flux, a LoRA,",
+    "//workflow2": "or img2img, point this at an API-format workflow JSON using the",
+    "//workflow3": "placeholders %positive% %negative% %seed% %steps% %cfg% %width% %height% %model% %prefix%",
+    "workflow": null,
+    "sampler": "dpmpp_2m",
+    "scheduler": "karras",
+    "steps": 30,
+    "cfg": 6.5
+  },
+
+  "//renderPrefix": "Style/character text put in front of every render prompt. A path to a",
+  "//renderPrefix2": "*.txt file works too. null auto-finds an Aster *.txt prompt file.",
+  "renderPrefix": null,
+  "renderNegative": null,
+
+  "//designSheet": "Path to Aster's markdown design sheet, for chat context (not the sampler).",
+  "//designSheet2": "null auto-finds an Aster *.md under ComfyUI-Shared\\training or characters\\.",
+  "designSheet": null
+}
