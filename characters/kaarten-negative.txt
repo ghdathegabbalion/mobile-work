@@ -1,0 +1,13 @@
+worst quality, low quality, jpeg artifacts, blurry, lowres, sketch, unfinished,
+bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, fused limbs,
+deformed, mutated, disfigured, malformed paws, extra tails, extra wings,
+cropped, out of frame, cut off feet, head out of frame,
+text, watermark, signature, username, artist name, logo, speech bubble, border, frame,
+multiple views, character sheet, split panel, duplicate character, two heads,
+photo, 3d render, realistic photograph,
+plain background, white background, empty background, flat color background,
+daylight, bright daylight, sunlit, washed out, desaturated, monochrome, greyscale,
+human, human skin, human ears, no fur, hairless,
+plain shorts, plain trousers, unstriped pants, bare legs,
+heterochromia, mismatched eyes, closed eyes,
+adult, muscular, tall
