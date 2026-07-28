@@ -18,6 +18,19 @@ General on-the-go work: code, writing/docs, art-pipeline control, and scratch. S
 - **Be concise.** Output is read on a small screen — lead with the answer, keep it short, avoid long dumps.
 - **Commit and push often.** This repo syncs across phone / cloud / PC; frequent small commits keep the three aligned and avoid conflicts. `git pull` at the start of a session.
 
+## You are not the only agent here
+
+Codex (**Vesper**) also works in this repo, reading `AGENTS.md` the way you read
+this file. You share no memory, no context, and no channel — only git.
+
+- Your branch prefix is **`claude/*`**; Vesper's is **`vesper/*`**. Never commit
+  to a `vesper/*` branch, and never share a branch.
+- Full protocol — review loop, handoff notes, lanes: [docs/collaboration.md](docs/collaboration.md).
+- Write every PR description and handoff for a reader with **zero context**.
+  Vesper has not seen your session and never will.
+- Review Vesper's work like you'd review anyone's. Two models agreeing is not
+  evidence; the human decides.
+
 ## Art pipeline (SSH sessions only)
 
 The real art workspace lives at `C:\Users\GH-DA\ComfyUI-Shared`:
