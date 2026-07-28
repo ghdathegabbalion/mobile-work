@@ -137,6 +137,24 @@ Open the printed Tailscale URL on the phone, then:
 
 You get an aster-bloom icon and it opens fullscreen, without browser chrome.
 
+### Two icons, one server
+
+There are two entry points, and pinning both gives you two home-screen icons
+backed by the same process, port, and logon task:
+
+| URL | icon | opens on |
+|---|---|---|
+| `/` | aster bloom | Chat |
+| `/gallery` | gold star | Gallery |
+
+Each serves its own `<title>`, apple-touch-icon, and manifest, so the phone
+installs them as separate tiles. They're the same app — from the Renders tile
+you can still tap through to Chat.
+
+The gold star is pixel-identical to `tools/render-gallery`'s, so pinning
+`/gallery` here and retiring that tool leaves the home screen looking the same.
+`/?tab=gallery` works too, if you'd rather deep-link than pin.
+
 ## Access control
 
 Unlike the read-only render gallery, this app talks to Aster and spends GPU time,
