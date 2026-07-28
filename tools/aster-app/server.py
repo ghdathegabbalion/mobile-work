@@ -1011,8 +1011,8 @@ class Transcript:
 
 # ------------------------------------------------------- gallery + png meta
 #
-# Trimmed from tools/render-gallery/server.py on purpose: each of these tools
-# should be a single file you can drop on the PC and run.
+# Inherited from the old tools/render-gallery, which this app replaced. Kept
+# inline on purpose: this stays a single file you can drop on the PC and run.
 
 
 def detect_output_dir(explicit=None):
@@ -1212,6 +1212,41 @@ def _png_bytes(size, rgb_rows):
     )
 
 
+def make_star_icon(size=180):
+    """The retired render-gallery's gold star, kept byte-identical so the tile
+    already pinned to the phone's home screen doesn't change when it's re-pinned
+    at /gallery. Don't "clean this up" into the aster bloom."""
+    import math
+
+    cx = cy = size / 2
+    pts = []
+    for i in range(10):
+        ang = -math.pi / 2 + i * math.pi / 5
+        r = size * 0.40 if i % 2 == 0 else size * 0.16
+        pts.append((cx + r * math.cos(ang), cy + r * math.sin(ang)))
+
+    def inside(x, y):
+        hit = False
+        j = len(pts) - 1
+        for i in range(len(pts)):
+            xi, yi = pts[i]
+            xj, yj = pts[j]
+            if (yi > y) != (yj > y) and x < (xj - xi) * (y - yi) / (yj - yi) + xi:
+                hit = not hit
+            j = i
+        return hit
+
+    rows = []
+    for y in range(size):
+        row = bytearray()
+        for x in range(size):
+            d = math.hypot(x - cx, y - cy) / (size / 2)
+            bg = (max(0, int(26 - d * 8)), max(0, int(19 - d * 6)), max(0, int(56 - d * 14)))
+            row += bytes((232, 185, 58)) if inside(x + 0.5, y + 0.5) else bytes(bg)
+        rows.append(bytes(row))
+    return _png_bytes(size, rows)
+
+
 def make_icon(size=180):
     """An aster bloom - violet petals, gold centre. Drawn by hand so the icon
     needs no image library, and distinct from the gallery's gold star."""
@@ -1256,13 +1291,13 @@ PAGE = """<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Aster</title>
-<link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/icon.png">
+<title>__APPTITLE__</title>
+<link rel="manifest" href="__MANIFEST__">
+<link rel="apple-touch-icon" href="__APPICON__">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Aster">
+<meta name="apple-mobile-web-app-title" content="__APPTITLE__">
 <meta name="theme-color" content="#12102a">
 <style>
 :root{--bg:#12102a;--card:#1c1940;--line:#322d63;--ink:#ece9ff;--dim:#9d97c8;
@@ -1340,6 +1375,8 @@ figure{margin:0;background:var(--card);border-radius:12px;overflow:hidden;positi
 figure img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;background:#221e4d}
 figcaption{padding:6px 8px 8px;font-size:11px;color:var(--dim);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fresh::after{content:"new";position:absolute;top:7px;right:7px;background:var(--gold);
+  color:#231c02;font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px}
 .gbar{display:flex;gap:8px;align-items:center;margin-bottom:10px}
 .gbar label{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:5px;flex:none}
 .gbar input[type=checkbox]{width:auto;accent-color:var(--violet)}
@@ -1570,6 +1607,7 @@ function drawGrid(){
   $('grid').innerHTML='';
   for(const i of show){
     const fig=document.createElement('figure');
+    if(i.fresh) fig.className='fresh';
     const img=document.createElement('img');
     img.loading='lazy'; img.src='/thumb/'+encodeURI(i.name); img.alt=i.name;
     img.onclick=()=>openImage(i.name);
@@ -1580,11 +1618,15 @@ function drawGrid(){
 }
 async function loadList(){
   try{
-    const fresh=await (await fetch('/api/list',{cache:'no-store'})).json();
-    items=fresh; fresh.forEach(i=>seen.add(i.name)); firstList=false; drawGrid();
+    const list=await (await fetch('/api/list',{cache:'no-store'})).json();
+    for(const i of list) i.fresh = !firstList && !seen.has(i.name);
+    items=list; list.forEach(i=>seen.add(i.name)); firstList=false; drawGrid();
   }catch(e){}
 }
 $('q').oninput=drawGrid; $('onlyAster').onchange=drawGrid;
+// same 8s cadence as the standalone gallery, but only while you're looking at it
+const onGallery=()=>$('pane-gallery').classList.contains('on');
+setInterval(()=>{ if(onGallery() && !document.hidden) loadList(); },8000);
 
 async function openImage(name){
   $('full').src='/img/'+encodeURI(name);
@@ -1617,13 +1659,59 @@ async function loadHello(){
   if(hello.negativeSource) $('negNote').textContent='(default: '+hello.negativeSource+')';
   $('rs').placeholder=hello.comfy.steps; $('rc').placeholder=hello.comfy.cfg;
 }
-(async()=>{ await loadHello(); await loadJobs(); await loadChat(); })();
-document.addEventListener('visibilitychange',()=>{if(!document.hidden){loadHello();loadJobs();}});
+// One server, two installable icons: "/" opens on Chat, "/gallery" opens on the
+// grid - which is what let the standalone render-gallery tool be retired.
+const INIT_TAB='__INITTAB__';
+(async()=>{
+  await loadHello(); await loadJobs(); await loadChat();
+  if(INIT_TAB!=='chat'){
+    const btn=document.querySelector('nav button[data-tab="'+INIT_TAB+'"]');
+    if(btn) btn.click();
+  }
+})();
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden) return;
+  loadHello(); loadJobs(); if(onGallery()) loadList();
+});
 </script></body></html>
 """
 
 
 # ------------------------------------------------------------------- server
+
+
+ENTRY_POINTS = {
+    # path -> (title, tab the page opens on, icon route, manifest route)
+    "chat": ("Aster", "chat", "/icon.png", "/manifest.webmanifest"),
+    "gallery": ("Renders", "gallery", "/icon-gallery.png", "/gallery.webmanifest"),
+}
+
+
+def render_page(entry="chat"):
+    title, tab, icon, manifest = ENTRY_POINTS.get(entry, ENTRY_POINTS["chat"])
+    return (
+        PAGE.replace("__APPTITLE__", title)
+        .replace("__APPICON__", icon)
+        .replace("__MANIFEST__", manifest)
+        .replace("__INITTAB__", tab)
+    )
+
+
+def manifest_for(entry):
+    title, _, icon, _ = ENTRY_POINTS[entry]
+    return {
+        "name": "Aster" if entry == "chat" else "ComfyUI renders",
+        "short_name": title,
+        "start_url": "/" if entry == "chat" else "/gallery",
+        "scope": "/",
+        "display": "standalone",
+        "background_color": "#12102a",
+        "theme_color": "#12102a",
+        "icons": [
+            {"src": icon, "sizes": "180x180", "type": "image/png"},
+            {"src": icon, "sizes": "512x512", "type": "image/png"},
+        ],
+    }
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -1691,31 +1779,22 @@ class Handler(BaseHTTPRequestHandler):
         path = posixpath.normpath(urllib.parse.urlparse(self.path).path)
         app = self.app
 
-        # Unauthenticated: the icon and manifest, so the home-screen tile works.
+        # Unauthenticated: icons and manifests, so the home-screen tiles work.
         if path in ("/icon.png", "/favicon.ico"):
             return self._send(make_icon(), "image/png", "max-age=86400")
-        if path == "/manifest.webmanifest":
+        if path == "/icon-gallery.png":
+            return self._send(make_star_icon(), "image/png", "max-age=86400")
+        if path in ("/manifest.webmanifest", "/gallery.webmanifest"):
+            entry = "gallery" if path.startswith("/gallery") else "chat"
             return self._send(
-                json.dumps(
-                    {
-                        "name": "Aster",
-                        "short_name": "Aster",
-                        "start_url": "/",
-                        "display": "standalone",
-                        "background_color": "#12102a",
-                        "theme_color": "#12102a",
-                        "icons": [
-                            {"src": "/icon.png", "sizes": "180x180", "type": "image/png"},
-                            {"src": "/icon.png", "sizes": "512x512", "type": "image/png"},
-                        ],
-                    }
-                ),
+                json.dumps(manifest_for(entry)),
                 "application/manifest+json",
                 "max-age=3600",
             )
 
-        if path == "/" and app.token:
+        if path in ("/", "/gallery") and app.token:
             # ?t=<token> once, then a cookie carries it - so <img> tags work too.
+            # Both entry points accept it; each redirects back to itself.
             given = (self._query().get("t") or [""])[0]
             if given and hmac.compare_digest(given, app.token):
                 return self._send(
@@ -1723,7 +1802,7 @@ class Handler(BaseHTTPRequestHandler):
                     "text/plain",
                     code=302,
                     extra={
-                        "Location": "/",
+                        "Location": path,
                         "Set-Cookie": f"aster={app.token}; Path=/; Max-Age=31536000; SameSite=Lax",
                     },
                 )
@@ -1737,8 +1816,11 @@ class Handler(BaseHTTPRequestHandler):
                 code=401,
             )
 
-        if path == "/":
-            return self._send(PAGE, "text/html; charset=utf-8", "no-cache")
+        if path in ("/", "/gallery"):
+            entry = "gallery" if path == "/gallery" else (
+                (self._query().get("tab") or ["chat"])[0]
+            )
+            return self._send(render_page(entry), "text/html; charset=utf-8", "no-cache")
 
         if path == "/api/hello":
             up, detail = app.comfy.status()
@@ -2101,12 +2183,16 @@ def main():
     print(f"output dir   : {app.output_dir or 'not found (pass --dir)'}")
     print(f"thumbnails   : {'Pillow' if HAVE_PIL else 'off (Pillow not installed)'}")
 
-    suffix = f"/?t={app.token}" if app.token else "/"
+    query = f"?t={app.token}" if app.token else ""
     hints = lan_hints(args.port)
     print("\nOpen on the phone:")
     for ip, is_tailscale in hints or [("localhost", False)]:
         tag = "  (tailscale)" if is_tailscale else ""
-        print(f"  http://{ip}:{args.port}{suffix}{tag}")
+        print(f"  http://{ip}:{args.port}/{query}{tag}")
+    print("\nOr pin a second icon that opens straight to the renders grid:")
+    for ip, is_tailscale in hints or [("localhost", False)]:
+        tag = "  (tailscale)" if is_tailscale else ""
+        print(f"  http://{ip}:{args.port}/gallery{query}{tag}")
     if app.token:
         print(f"\nToken is stored in {TOKEN_PATH} - the link sets a cookie, so you")
         print("only need the ?t= part once per phone. --no-token turns auth off.")

@@ -41,7 +41,6 @@ The real art workspace lives at `C:\Users\GH-DA\ComfyUI-Shared`:
 
 ## Phone-facing tools (they run on the PC, you reach them from the phone)
 
-Both are stdlib-only Python servers, pinned to the phone home screen over Tailscale:
+`tools/aster-app/` is the only one — a stdlib-only Python server pinned to the phone home screen over Tailscale. Chat with Aster, queue renders, browse the output folder. Aster's chat backend is pluggable and self-discovering; `python server.py --probe` reports what it actually resolved. Read its README before changing it.
 
-- `tools/aster-app/` — chat with Aster + queue renders + gallery. Aster's chat backend is pluggable; `python server.py --probe` reports what it actually resolved. Read its README before changing it.
-- `tools/render-gallery/` — read-only grid of ComfyUI's output folder.
+It serves two home-screen icons from one process: `/` opens on Chat, `/gallery` opens on the renders grid. `tools/render-gallery/` was retired into that second entry point — don't recreate it.
