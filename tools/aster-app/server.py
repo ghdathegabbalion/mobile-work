@@ -1340,6 +1340,8 @@ figure{margin:0;background:var(--card);border-radius:12px;overflow:hidden;positi
 figure img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;background:#221e4d}
 figcaption{padding:6px 8px 8px;font-size:11px;color:var(--dim);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fresh::after{content:"new";position:absolute;top:7px;right:7px;background:var(--gold);
+  color:#231c02;font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px}
 .gbar{display:flex;gap:8px;align-items:center;margin-bottom:10px}
 .gbar label{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:5px;flex:none}
 .gbar input[type=checkbox]{width:auto;accent-color:var(--violet)}
@@ -1570,6 +1572,7 @@ function drawGrid(){
   $('grid').innerHTML='';
   for(const i of show){
     const fig=document.createElement('figure');
+    if(i.fresh) fig.className='fresh';
     const img=document.createElement('img');
     img.loading='lazy'; img.src='/thumb/'+encodeURI(i.name); img.alt=i.name;
     img.onclick=()=>openImage(i.name);
@@ -1580,11 +1583,15 @@ function drawGrid(){
 }
 async function loadList(){
   try{
-    const fresh=await (await fetch('/api/list',{cache:'no-store'})).json();
-    items=fresh; fresh.forEach(i=>seen.add(i.name)); firstList=false; drawGrid();
+    const list=await (await fetch('/api/list',{cache:'no-store'})).json();
+    for(const i of list) i.fresh = !firstList && !seen.has(i.name);
+    items=list; list.forEach(i=>seen.add(i.name)); firstList=false; drawGrid();
   }catch(e){}
 }
 $('q').oninput=drawGrid; $('onlyAster').onchange=drawGrid;
+// same 8s cadence as the standalone gallery, but only while you're looking at it
+const onGallery=()=>$('pane-gallery').classList.contains('on');
+setInterval(()=>{ if(onGallery() && !document.hidden) loadList(); },8000);
 
 async function openImage(name){
   $('full').src='/img/'+encodeURI(name);
@@ -1618,7 +1625,10 @@ async function loadHello(){
   $('rs').placeholder=hello.comfy.steps; $('rc').placeholder=hello.comfy.cfg;
 }
 (async()=>{ await loadHello(); await loadJobs(); await loadChat(); })();
-document.addEventListener('visibilitychange',()=>{if(!document.hidden){loadHello();loadJobs();}});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden) return;
+  loadHello(); loadJobs(); if(onGallery()) loadList();
+});
 </script></body></html>
 """
 
