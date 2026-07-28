@@ -151,13 +151,31 @@ Each serves its own `<title>`, apple-touch-icon, and manifest, so the phone
 installs them as separate tiles. They're the same app — from the Renders tile
 you can still tap through to Chat.
 
-The gold star is pixel-identical to `tools/render-gallery`'s, so pinning
-`/gallery` here and retiring that tool leaves the home screen looking the same.
 `/?tab=gallery` works too, if you'd rather deep-link than pin.
+
+### Replacing the old render-gallery tool
+
+`tools/render-gallery/` used to serve the grid on its own port (8777) with its
+own logon task. It's gone — `/gallery` here does the same job, and its gold star
+is byte-identical to that tool's icon, so the pinned tile looks unchanged.
+
+**Run this on the PC once**, from an admin PowerShell — otherwise a logon task
+keeps launching a deleted script and port 8777 stays open in the firewall:
+
+```powershell
+Unregister-ScheduledTask -TaskName 'ComfyUI Render Gallery' -Confirm:$false
+Get-NetFirewallRule -DisplayName 'ComfyUI Render Gallery' | Remove-NetFirewallRule
+```
+
+(The old `install-autostart.ps1 -Uninstall` did exactly this, but it was deleted
+along with the folder. These two lines don't depend on recovering it.)
+
+Then re-pin `http://<tailscale-ip>:8778/gallery` on the phone and delete the old
+8777 icon.
 
 ## Access control
 
-Unlike the read-only render gallery, this app talks to Aster and spends GPU time,
+Unlike a read-only gallery, this app talks to Aster and spends GPU time,
 so it asks for a token by default. One is generated into `aster.token` on first
 run and the startup URL carries it as `?t=…`; opening that link once sets a
 cookie, so you don't paste it again on that phone. `--no-token` turns it off.

@@ -1011,8 +1011,8 @@ class Transcript:
 
 # ------------------------------------------------------- gallery + png meta
 #
-# Trimmed from tools/render-gallery/server.py on purpose: each of these tools
-# should be a single file you can drop on the PC and run.
+# Inherited from the old tools/render-gallery, which this app replaced. Kept
+# inline on purpose: this stays a single file you can drop on the PC and run.
 
 
 def detect_output_dir(explicit=None):
@@ -1213,8 +1213,9 @@ def _png_bytes(size, rgb_rows):
 
 
 def make_star_icon(size=180):
-    """The render gallery's gold star, kept pixel-identical so retiring that
-    tool doesn't change the tile already sitting on the phone's home screen."""
+    """The retired render-gallery's gold star, kept byte-identical so the tile
+    already pinned to the phone's home screen doesn't change when it's re-pinned
+    at /gallery. Don't "clean this up" into the aster bloom."""
     import math
 
     cx = cy = size / 2
@@ -1659,7 +1660,7 @@ async function loadHello(){
   $('rs').placeholder=hello.comfy.steps; $('rc').placeholder=hello.comfy.cfg;
 }
 // One server, two installable icons: "/" opens on Chat, "/gallery" opens on the
-// grid. Lets the standalone render gallery retire without losing its tile.
+// grid - which is what let the standalone render-gallery tool be retired.
 const INIT_TAB='__INITTAB__';
 (async()=>{
   await loadHello(); await loadJobs(); await loadChat();
