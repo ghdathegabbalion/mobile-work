@@ -31,3 +31,8 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+# Tool state — machine-local, not shared across phone / cloud / PC
+tools/*/*.log
+tools/aster-app/aster.config.json
+tools/aster-app/aster-chat.json
