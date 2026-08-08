@@ -1,0 +1,27 @@
+asterfen, masterpiece, best quality, highly detailed, solo, 1girl,
+anthro fennec fox girl, slender, small frame, digitigrade,
+cream off-white fur, pale sand limbs,
+(short blonde bob, blunt bangs:1.2),
+(enormous upright fennec ears:1.2), tan ear edging, apricot-pink inner ear, white ear tufts,
+(golden-tan chevron marking on forehead:1.1),
+(large round warm amber eyes:1.2), freckles on muzzle and cheeks, small dark nose,
+gentle closed-mouth smile,
+(single tail:1.4), (one tail only:1.3),
+(tail is cream fox fur at the base fading through a marigold band into a smooth ink-purple
+octopus tentacle at the tip:1.3), pale mauve suckers on the tentacle underside,
+curling tentacle tip, star-speckled tail,
+(ink-dipped paws:1.2), violet hands with mauve pads, violet feet with mauve pads,
+cream fur darkening gradually into violet at the wrists and ankles,
+(brown leather hip pouch with a gold crescent moon on the flap:1.2),
+white knitted scarf with fringed ends,
+soft pastel palette, cream lavender violet, warm amber accents,
+crisp linework, painterly cel shading, cosy, starry-eyed
+
+# Trigger word `asterfen` must stay first — it is what her LoRA responds to.
+# LoRA: aster-illustrious-v1.safetensors @ ~0.8 on furrytoonmix_xlIllustriousV2.
+#
+# NEVER include "many arms for parallel work" from her persona. It is a metaphor about
+# concurrency and it grows her extra tentacles.
+#
+# Append the outfit and setting after this block — wardrobe is free to vary. Add
+# "chibi, super deformed" for the desktop-pet form.
