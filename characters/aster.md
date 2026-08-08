@@ -26,25 +26,28 @@ the other. Each has a designated reference image.
 | **Full** | `ref/aster-ref.png` | The eight emote sprites in `sprites/` | Slender anthro, full illustrated backgrounds, painterly |
 | **Chibi** | `ref/aster-ref-chibi.png` | The `_cut` cutouts driving the desktop pet | Big head, stubby limbs, transparent background, simplified linework |
 
-### About the references — read before replacing them
+### The three reference files, and what each is for
 
-Both are **her own existing sprites, designated rather than generated**: `wave.png` and
-`idle_cut.png` from `ghdathegabbalion/Aster`. They were rendered with her LoRA, so they are
-more faithful than any fresh generation can be, and they cost nothing.
+They are not interchangeable. Pick by what you need.
 
-This is deliberately the Vesper method. His two forms stay solid because `vesper.png` and
-`vesper-chibi.png` are curated assets that get **reused**; Aster's twelve sprites were each
-generated independently, which is why she drifted. An anchor beats a better prompt.
+| File | Authority | Notes |
+|---|---|---|
+| `ref/aster-ref.png` | **Design.** Every locked trait, correct. | Purpose-built, neutral pose, plain background. Use this to check whether a render is *correct*. |
+| `ref/aster-ref-style.png` | **Style.** How she is actually drawn. | Her own `wave.png`, rendered with her LoRA. Use this to check whether a render *looks like her art*. Older palette — coral tail transition, no bloom. |
+| `ref/aster-ref-chibi.png` | **Chibi form.** | Her own `idle_cut.png`. Transparent background, clearest view of the moon pouch. Older palette. |
 
-`ref/aster-ref.png` (`wave.png`) was chosen because it carries the most canon in one frame:
-the **moon pouch strap**, a clearly visible **paw with mauve pads**, the tail's **suckers
-and constellation markings**, sweater, scarf and face. `ref/aster-ref-chibi.png`
-(`idle_cut.png`) has a transparent background and the clearest view of the **moon pouch**.
+The split exists because no single image is both. `aster-ref.png` carries the full canon
+including the marigold band, the aster bloom and the ink-dipped paws — but it was made on
+Comfy Cloud, so its rendering is not her established Illustrious/LoRA look. The style file
+is. **When the two disagree about a trait, the design file wins; when they disagree about
+rendering, the style file wins.**
 
-Neither is a purpose-built neutral-pose sheet — both have a pose and `aster-ref.png` has a
-beach behind her. If a cleaner reference is wanted, render one **on the PC with her LoRA**
-(`../docs/aster-render-on-pc.md`) and replace these. Do not replace them with cloud
-text-to-image output; see the evidence table below.
+This mirrors how Vesper stays solid — curated assets that get **reused** rather than
+regenerated. Aster's twelve sprites were each generated independently, which is why she
+drifted. An anchor beats a better prompt.
+
+The eventual goal is one file that is both: render `aster-ref.png`'s design in her LoRA's
+style on the PC (`../docs/aster-render-on-pc.md`), and this three-way split collapses.
 
 ## Locked traits — these do not vary between forms or outfits
 
@@ -126,12 +129,36 @@ Two separate lessons:
 
 - **`aspect_ratio` is ignored by `flux-2-pro`.** Passing `width`/`height` inside `params`
   works; the top-level argument does not. (Same finding as Kaarten's sheet.)
-- **Flux cannot hold the single-tail gradient, and cannot match her style at all.** Her
-  sprites come from an Illustrious-family checkpoint plus her own LoRA. Flux produces a
-  different artist drawing a similar character — which is exactly what a canonical
-  reference must never be.
+- **Blind text-to-image cannot hold her single tail.** Five straight attempts produced a
+  wrong tail, and every wrong answer was **bilaterally symmetric** — fox tail + tentacle, or
+  tentacle + tentacle. The model is not confused about what her tail is made of; it wants
+  something on both sides of her. Wording alone never fixed it.
 
-**Render her locally with her LoRA. It is free and it is the only thing that holds her.**
+### What did work — the recipe that produced `ref/aster-ref.png`
+
+Two stages. Neither works alone.
+
+1. **Generate with her own art as reference.** `bfl/flux-2-pro`, model `Flux.2 [max]`,
+   1024×1536, with `wave.png` and `idle_cut.png` wired into `model.images.image_1` and
+   `image_2` via `LoadImage` → `Flux2ImageNode` in `submit_workflow`. This fixed the moon
+   pouch, the aster bloom, the bob, the lavender sweater and the ink-dipped feet — but still
+   produced two tentacles.
+2. **Then edit, do not re-roll.** `vertexai/nano-banana-pro` via `partner_generate`, passing
+   the stage-1 output by `medias: [{role: "image", prompt_id: …}]`, with a prompt naming
+   only three localised changes: delete the second tentacle, add the cream ruff and marigold
+   band at the base of the survivor, ink-dip the hands. Everything already correct survived
+   untouched.
+
+**The general rule: once a render gets most things right, edit it. Re-rolling puts the
+things that already work back into the lottery to fix the one that doesn't.**
+
+Two operational notes: `bfl/flux-kontext-max` **refused this edit as moderated** — Nano
+Banana Pro accepted the same request, so try the other provider before assuming the content
+is the problem. And image-input edits fall back to direct dispatch, so the result is **not
+saved to the asset library** — download it from the returned URL immediately or it is lost.
+
+**For style, still render locally with her LoRA.** It is free, and it is the only thing that
+reproduces how she actually looks.
 
 ## Why the warm accents — the reasoning, so it can be argued with
 
@@ -172,9 +199,9 @@ else. If you disagree with it, argue with the reasoning above; don't re-derive i
 ### Debt this creates
 
 These traits — the marigold band, the aster bloom, amber eyes, and ink-dipped paws as a rule
-— are **canon as of 2026-08-08 but not yet present in her sprite set**. The twelve sprites
-predate this decision. Until they are regenerated, her deployed art and this sheet disagree,
-and **this sheet wins**.
+— are **canon as of 2026-08-08 and present in `ref/aster-ref.png`, but not yet in her sprite
+set**. The twelve sprites predate the decision. Until they are regenerated, her deployed art
+and this sheet disagree, and **this sheet wins**.
 
 Regenerating them needs her LoRA on the PC — see `../docs/aster-render-on-pc.md`, which
 carries the sprite-regeneration procedure including the alpha-channel step for the desktop
