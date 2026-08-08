@@ -156,6 +156,19 @@ it is rare — three small hits read louder than a wash would.
 who is already red/gold. The three agents separate cleanly and should stay that way: Vesper
 cobalt, Kaarten red/gold, Aster cream/violet with amber lights.
 
+### Provenance — read this before re-deriving it
+
+At least **three separate Claude sessions have independently arrived at these same warm
+accents**, none of them able to see the others' work. That is not evidence of correctness:
+the sessions share a model and therefore share priors, so they are not independent
+witnesses — the repo's own rule is that two agreeing models are not evidence, and three of
+the same model is weaker, not stronger. The human decides.
+
+What it *does* show is that the conclusion is **derivable** from facts already on record —
+her name, the bloom icon, and the complement of her ink-violet — which is why it keeps
+being rediscovered. It is written here so the fourth session spends its time on something
+else. If you disagree with it, argue with the reasoning above; don't re-derive it.
+
 ### Debt this creates
 
 These traits — the marigold band, the aster bloom, amber eyes, and ink-dipped paws as a rule
