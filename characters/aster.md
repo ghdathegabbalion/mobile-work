@@ -55,7 +55,8 @@ text-to-image output; see the evidence table below.
 - **Ears:** enormous upright fennec ears, as long as her head — cream outside with tan
   edging, **apricot-pink inside**, dense white fur tufts at the inner base.
 - **Forehead:** a crisp **golden-tan chevron** centred below the hairline, pointing down.
-- **Eyes:** large, round, **warm amber-gold**, soft dark lashes.
+- **Eyes:** large, round, **warm amber-gold**, soft dark lashes. Amber, not brown — they are
+  the warmest note on her face and the anchor of her warm accents.
 - **Face:** short delicate muzzle, small dark nose, **freckles across the muzzle and both
   cheeks**, gentle closed-mouth smile.
 - **Tail — the load-bearing trait.** **Exactly one tail. One continuous limb.** Thick cream
@@ -63,6 +64,12 @@ text-to-image output; see the evidence table below.
   midpoint; past that band the *same limb* continues as smooth glossy **ink-violet
   tentacle**, hairless, curling upward to a curled tip, with **pale mauve suckers on the
   underside only**. Frequently star-speckled or carrying constellation markings.
+  The marigold band is **canon, not optional** — it replaces the coral/pink transition seen
+  in the older sprites. It is the warm centre of her palette and the reason the tail reads
+  as her name; see *Why the warm accents* below.
+- **Aster bloom:** a small **aster flower worn at the base of her left ear — violet petals,
+  gold centre.** Her namesake, and the second of her two small accessories alongside the
+  moon pouch. Keep it small; it should not compete with the pouch.
 - **Ink-dipped extremities:** cream forearm fur darkening into violet hands with mauve-pink
   pads; cream legs darkening into violet feet with mauve pads. Soft smoky gradient, never a
   hard line. *This is the meaning of "warm above, deep below."*
@@ -126,22 +133,36 @@ Two separate lessons:
 
 **Render her locally with her LoRA. It is free and it is the only thing that holds her.**
 
-## Proposed evolution — not canon, decide deliberately
-
-An argument for giving her more warm orange, recorded so the idea survives:
+## Why the warm accents — the reasoning, so it can be argued with
 
 Asters are violet petals around a **gold centre**, and the aster-bloom app icon
-(`tools/aster-app/server.py:1251`) is already drawn as "violet petals, gold centre". Warm
-gold-orange against violet is her namesake's own palette. Orange is also the direct
-complement of violet, and her current palette is analogous — soft, but low-contrast.
+(`tools/aster-app/server.py:1251`) was already hand-drawn as "violet petals, gold centre".
+Warm gold-orange against violet is her namesake's own palette — it was latent in her from
+the start and simply never made it onto her. Orange is also the direct complement of violet,
+and without it her palette is analogous: soft, but low-contrast, with the ink-purple doing
+all the work unsupported.
 
-If taken, keep it to **two places only**: amber eyes (already nearly true), and a
-**marigold band at the tail's transition**, replacing the coral that is already there. That
-puts the warm note exactly where fur becomes tentacle, so the tail reads as her name.
+So the warm note appears in exactly **three** places, and nowhere else:
 
-Do **not** put orange in her fur — it turns her into a red fox and collides with Kaarten,
-who is already red/gold. The three agents currently separate cleanly: Vesper cobalt,
-Kaarten red/gold, Aster cream/violet.
+1. **Amber eyes** — the focal point.
+2. **The marigold band at the tail's transition** — the highest-value spot, because it sits
+   where cream becomes violet, so the tail reads as a flower and as her name at once.
+3. **The gold centre of the aster bloom at her ear.**
 
-Taking this means **regenerating the sprite set** so her app and her sheet don't drift
-apart. That is a deliberate job, not a side effect of making one reference.
+The restraint is the design. She is a soft pastel character and the warmth works *because*
+it is rare — three small hits read louder than a wash would.
+
+**Never put orange in her fur.** It turns her into a red fox, and it collides with Kaarten,
+who is already red/gold. The three agents separate cleanly and should stay that way: Vesper
+cobalt, Kaarten red/gold, Aster cream/violet with amber lights.
+
+### Debt this creates
+
+These traits — the marigold band, the aster bloom, amber eyes, and ink-dipped paws as a rule
+— are **canon as of 2026-08-08 but not yet present in her sprite set**. The twelve sprites
+predate this decision. Until they are regenerated, her deployed art and this sheet disagree,
+and **this sheet wins**.
+
+Regenerating them needs her LoRA on the PC — see `../docs/aster-render-on-pc.md`, which
+carries the sprite-regeneration procedure including the alpha-channel step for the desktop
+cutouts. That is owed work, tracked here so it is not forgotten.

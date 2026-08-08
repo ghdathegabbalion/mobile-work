@@ -7,12 +7,14 @@ cream off-white fur, pale sand limbs,
 (large round warm amber eyes:1.2), freckles on muzzle and cheeks, small dark nose,
 gentle closed-mouth smile,
 (single tail:1.4), (one tail only:1.3),
-(tail is cream fox fur at the base fading through a marigold band into a smooth ink-purple
-octopus tentacle at the tip:1.3), pale mauve suckers on the tentacle underside,
+(tail is cream fox fur at the base fading through a glowing marigold band into a smooth
+ink-purple octopus tentacle at the tip:1.3), (marigold amber band at the tail transition:1.2),
+pale mauve suckers on the tentacle underside,
 curling tentacle tip, star-speckled tail,
 (ink-dipped paws:1.2), violet hands with mauve pads, violet feet with mauve pads,
 cream fur darkening gradually into violet at the wrists and ankles,
 (brown leather hip pouch with a gold crescent moon on the flap:1.2),
+(small aster flower at the base of the left ear:1.2), violet petals, gold flower centre,
 white knitted scarf with fringed ends,
 soft pastel palette, cream lavender violet, warm amber accents,
 crisp linework, painterly cel shading, cosy, starry-eyed
