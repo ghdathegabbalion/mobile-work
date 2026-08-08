@@ -19,12 +19,32 @@ Her own persona file describes her in one line, and it is the design thesis:
 ## Two forms — both canonical
 
 She has two forms, the same way Vesper does. Both must stay consistent; neither replaces
-the other.
+the other. Each has a designated reference image.
 
-| Form | Where it's used | Character |
-|---|---|---|
-| **Full** | The eight emote sprites in `sprites/` | Slender anthro, full illustrated backgrounds, painterly |
-| **Chibi** | The `_cut` cutouts driving the desktop pet | Big head, stubby limbs, transparent background, simplified linework |
+| Form | Reference | Where it's used | Character |
+|---|---|---|---|
+| **Full** | `ref/aster-ref.png` | The eight emote sprites in `sprites/` | Slender anthro, full illustrated backgrounds, painterly |
+| **Chibi** | `ref/aster-ref-chibi.png` | The `_cut` cutouts driving the desktop pet | Big head, stubby limbs, transparent background, simplified linework |
+
+### About the references — read before replacing them
+
+Both are **her own existing sprites, designated rather than generated**: `wave.png` and
+`idle_cut.png` from `ghdathegabbalion/Aster`. They were rendered with her LoRA, so they are
+more faithful than any fresh generation can be, and they cost nothing.
+
+This is deliberately the Vesper method. His two forms stay solid because `vesper.png` and
+`vesper-chibi.png` are curated assets that get **reused**; Aster's twelve sprites were each
+generated independently, which is why she drifted. An anchor beats a better prompt.
+
+`ref/aster-ref.png` (`wave.png`) was chosen because it carries the most canon in one frame:
+the **moon pouch strap**, a clearly visible **paw with mauve pads**, the tail's **suckers
+and constellation markings**, sweater, scarf and face. `ref/aster-ref-chibi.png`
+(`idle_cut.png`) has a transparent background and the clearest view of the **moon pouch**.
+
+Neither is a purpose-built neutral-pose sheet — both have a pose and `aster-ref.png` has a
+beach behind her. If a cleaner reference is wanted, render one **on the PC with her LoRA**
+(`../docs/aster-render-on-pc.md`) and replace these. Do not replace them with cloud
+text-to-image output; see the evidence table below.
 
 ## Locked traits — these do not vary between forms or outfits
 

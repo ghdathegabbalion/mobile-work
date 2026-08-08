@@ -28,11 +28,18 @@ consistently.
 - `CLAUDE.md` — a section describing who she is, so future sessions boot knowing her. This
   is the actual anti-recurrence fix.
 
+- `characters/ref/aster-ref.png` and `ref/aster-ref-chibi.png` — one reference per form.
+  **Designated, not generated**: they are her own `wave.png` and `idle_cut.png`, copied from
+  `ghdathegabbalion/Aster`. Rendered with her LoRA, so more faithful than any fresh
+  generation, and free. This is the Vesper method — his forms stay solid because his two
+  PNGs are reused rather than regenerated.
+
 **Not done:**
 
-- **There is no `characters/ref/aster-ref.png`.** No reference image is committed. Three
-  Comfy Cloud attempts on `bfl/flux-2-pro` all failed (two tails, two tails, no tail) and
-  none were kept. The render still needs to happen on the PC.
+- **No purpose-built neutral-pose reference sheet.** The two committed references are real
+  sprites with poses and, in the full form's case, a beach background. Good enough to anchor
+  from, not a clean turnaround sheet. Three Comfy Cloud attempts on `bfl/flux-2-pro` failed
+  (two tails, two tails, no tail) and none were kept; a proper one wants her LoRA on the PC.
 
 **Facts worth not rediscovering:**
 
