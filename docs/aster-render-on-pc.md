@@ -95,6 +95,11 @@ deployed art and her sheet disagree — and the sheet wins.
 This is a PC job. It needs her LoRA, and the desktop cutouts need an alpha channel that no
 cloud image editor will preserve.
 
+> **Use `characters/sprite-regen/`.** It automates everything below: `python
+> characters\sprite-regen\regen.py --sprites C:\Users\GH-DA\Aster\sprites`. The notes
+> here are the reasoning behind it. As of 2026-09-25 the chibi form also owes the full trait
+> list, and every sweater is lavender. See `characters/aster.md`.
+
 ### Full form — the eight emotes
 
 `idle, wave, happy, dance, think, sleepy, excited, shy` in `ghdathegabbalion/Aster/sprites/`.

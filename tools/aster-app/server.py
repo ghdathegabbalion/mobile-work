@@ -17,7 +17,9 @@ against ComfyUI itself, so the chat backend never needs tool permissions.
 """
 
 import argparse
+import copy
 import glob
+import hashlib
 import hmac
 import io
 import json
@@ -120,6 +122,9 @@ DEFAULT_CONFIG = {
         "model": "aster",
         "headers": {},
         "timeoutSeconds": 300,
+        # true asks Aster to stream ("stream": true + Accept: text/event-stream).
+        # A text/event-stream reply is streamed to the phone either way.
+        "stream": False,
     },
     "cli": {
         "command": None,  # None -> auto-detect the Claude Code CLI
@@ -145,25 +150,28 @@ DEFAULT_CONFIG = {
 
 
 def deep_merge(base, over):
-    out = dict(base)
+    # Deep-copied, not dict(base): nested dicts would otherwise be shared with
+    # DEFAULT_CONFIG, and App's in-place tweaks (--comfy, --aster) would leak
+    # into the defaults for every later load.
+    out = copy.deepcopy(base)
     for key, val in (over or {}).items():
         if isinstance(val, dict) and isinstance(out.get(key), dict):
             out[key] = deep_merge(out[key], val)
         else:
-            out[key] = val
+            out[key] = copy.deepcopy(val)
     return out
 
 
 def load_config(path=CONFIG_PATH):
     """Config file is optional - the defaults auto-detect a working setup."""
     if not path.is_file():
-        return dict(DEFAULT_CONFIG), None
+        return copy.deepcopy(DEFAULT_CONFIG), None
     try:
         user = json.loads(path.read_text(encoding="utf-8"))
     except Exception as exc:
-        return dict(DEFAULT_CONFIG), f"{path.name} is not valid JSON: {exc}"
+        return copy.deepcopy(DEFAULT_CONFIG), f"{path.name} is not valid JSON: {exc}"
     if not isinstance(user, dict):
-        return dict(DEFAULT_CONFIG), f"{path.name} must contain a JSON object"
+        return copy.deepcopy(DEFAULT_CONFIG), f"{path.name} must contain a JSON object"
     return deep_merge(DEFAULT_CONFIG, user), None
 
 
@@ -198,6 +206,21 @@ def read_text(path):
         return Path(path).read_text(encoding="utf-8").strip()
     except Exception:
         return None
+
+
+def read_prompt_file(path):
+    """A render prompt/negative .txt, as one line the sampler can take.
+
+    Whole-line # comments are notes for people, not CLIP - and Aster's prompt
+    file's notes quote exactly the phrases ("many arms for parallel work")
+    that grow her extra tentacles. Only for prompt files; the .md design sheet
+    goes to chat verbatim.
+    """
+    raw = read_text(path)
+    if raw is None:
+        return None
+    lines = [ln.strip() for ln in raw.splitlines()]
+    return " ".join(ln for ln in lines if ln and not ln.startswith("#")).strip()
 
 
 # ------------------------------------------------------------- chat backends
@@ -278,13 +301,18 @@ def discover_aster(base, timeout=4):
     # Aster is up but wedged.
     deadline = time.monotonic() + 3 * timeout
     sources = [page]
+    origin = urllib.parse.urlparse(base).netloc.lower()
     for src in SCRIPT_SRC_RE.findall(page)[:6]:
         if time.monotonic() > deadline:
             break
-        if src.startswith(("http://", "https://")) and not src.startswith(base):
-            continue  # same-origin only; a CDN bundle isn't Aster's API
+        script_url = urllib.parse.urljoin(base + "/", src)
+        # Compare hosts, not string prefixes: a protocol-relative //cdn/x.js
+        # slipped past the old prefix check. Same-origin only; a CDN bundle
+        # isn't Aster's API.
+        if urllib.parse.urlparse(script_url).netloc.lower() != origin:
+            continue
         try:
-            body, _ = _fetch_text(urllib.parse.urljoin(base + "/", src), timeout)
+            body, _ = _fetch_text(script_url, timeout)
             sources.append(body)
         except Exception:
             continue
@@ -356,8 +384,115 @@ class EchoBackend:
             )
 
 
+# ------------------------------------------------ server-sent events (SSE)
+#
+# For an Aster that answers a POST with text/event-stream. The stream is read
+# line by line off the open response, so each delta reaches the phone as it
+# arrives. WebSocket is a different protocol entirely and stays unsupported.
+
+
+def iter_sse(lines):
+    """(event, data) per SSE event from an iterable of byte (or str) lines.
+
+    Multi-line data is joined with \\n, one leading space after the colon is
+    dropped (per the spec, so " world" tokens keep their own space), and
+    comment / id / retry lines are ignored.
+    """
+    event, data, has_data = "", [], False
+    for line in lines:
+        if isinstance(line, bytes):
+            line = line.decode("utf-8", "replace")
+        line = line.rstrip("\r\n")
+        if not line:
+            if has_data:
+                yield event or "message", "\n".join(data)
+            event, data, has_data = "", [], False
+            continue
+        if line.startswith(":"):
+            continue  # comment / keep-alive
+        field, _, value = line.partition(":")
+        if value.startswith(" "):
+            value = value[1:]
+        if field == "data":
+            data.append(value)
+            has_data = True
+        elif field == "event":
+            event = value
+    if has_data:  # a server that closes without the final blank line
+        yield event or "message", "\n".join(data)
+
+
+def _text_of(val):
+    """A delta that's a plain string, or a {text|content} dict around one."""
+    if isinstance(val, str):
+        return val
+    if isinstance(val, dict):
+        for key in ("text", "content"):
+            if isinstance(val.get(key), str):
+                return val[key]
+    return None
+
+
+def sse_delta(data):
+    """The text in one SSE data payload.
+
+    Returns the text, "" for a recognised event that carries none (an OpenAI
+    role-only first chunk, a finish chunk, {"done": true}), or None for a
+    shape this doesn't know.
+    """
+    try:
+        obj = json.loads(data)
+    except Exception:
+        return data  # raw text deltas
+    if isinstance(obj, str):
+        return obj
+    if not isinstance(obj, dict):
+        # A bare number or true is still a token of text; a list isn't.
+        return None if isinstance(obj, list) else data
+    choices = obj.get("choices")
+    if isinstance(choices, list):
+        first = choices[0] if choices and isinstance(choices[0], dict) else {}
+        for key in ("delta", "message"):  # chat chunk, or a whole message
+            text = _text_of(first.get(key))
+            if text is not None:
+                return text
+        return first["text"] if isinstance(first.get("text"), str) else ""
+    # {"text"|"content"|"delta"|"token": ...}; delta/token may be a dict, as
+    # Anthropic's {"delta": {"text"}} and TGI's {"token": {"text"}} are.
+    for key in ("text", "content", "delta", "token", "response", "reply", "message"):
+        text = _text_of(obj.get(key))
+        if text is not None:
+            return text
+    if obj.get("done") or obj.get("finish_reason") or obj.get("type") in (
+        "message_start", "message_stop", "content_block_start",
+        "content_block_stop", "message_delta", "ping",
+    ):
+        return ""
+    return None
+
+
+def sse_error(event, data):
+    """The error text if this event reports a failure, else None."""
+    try:
+        obj = json.loads(data)
+    except Exception:
+        obj = None
+    err = obj.get("error") if isinstance(obj, dict) else None
+    if isinstance(err, dict):
+        msg = err.get("message")
+        return msg if isinstance(msg, str) and msg else json.dumps(err)[:300]
+    if err:
+        return str(err)
+    if event == "error":
+        return data.strip() or "error"
+    return None
+
+
 class HttpBackend:
-    """Aster already listens on a port. OpenAI-shaped or a plain {message} POST."""
+    """Aster already listens on a port. OpenAI-shaped or a plain {message} POST.
+
+    The reply can be JSON, plain text, or a text/event-stream of deltas.
+    """
 
     name = "http"
 
@@ -384,7 +519,7 @@ class HttpBackend:
                     ]
                     + [{"role": "user", "content": message}]
                 ),
-                "stream": False,
+                "stream": bool(self.cfg.get("stream")),
             }
         else:
             payload = {
@@ -396,21 +531,72 @@ class HttpBackend:
                     if m.get("role") in ("user", "assistant")
                 ],
             }
+            if self.cfg.get("stream"):
+                payload["stream"] = True
 
         body = json.dumps(payload).encode("utf-8")
         headers = {"Content-Type": "application/json"}
+        if self.cfg.get("stream"):
+            headers["Accept"] = "text/event-stream, application/json;q=0.9, */*;q=0.5"
         headers.update(self.cfg.get("headers") or {})
         req = urllib.request.Request(self.url, data=body, headers=headers)
         try:
-            with local_opener().open(req, timeout=self.cfg.get("timeoutSeconds", 300)) as resp:
-                raw = resp.read().decode("utf-8", "replace")
+            resp = local_opener().open(req, timeout=self.cfg.get("timeoutSeconds", 300))
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", "replace")[:500]
             raise BackendError(f"Aster returned HTTP {exc.code}: {detail}") from None
         except Exception as exc:
             raise BackendError(f"Could not reach Aster at {self.url}: {exc}") from None
 
+        with resp:
+            if "text/event-stream" in (resp.headers.get("Content-Type") or "").lower():
+                # Hand each delta on as it lands, so the phone sees it type.
+                yield from self._stream_sse(resp)
+                return
+            try:
+                raw = resp.read().decode("utf-8", "replace")
+            except Exception as exc:
+                raise BackendError(f"Could not reach Aster at {self.url}: {exc}") from None
+
+        if raw.lstrip().startswith("data:"):
+            # SSE sent under the wrong Content-Type: still readable, just not live.
+            yield from self._stream_sse(io.BytesIO(raw.encode("utf-8")))
+            return
         yield self._extract(raw)
+
+    def _stream_sse(self, lines):
+        """Yield text deltas from a text/event-stream body.
+
+        Stops at [DONE] or end of stream. An `event: error` or an {"error": ...}
+        payload becomes a BackendError. If the connection drops mid-reply, what
+        arrived is kept and the cut is said out loud, as the CLI backend does.
+        """
+        got_text, skipped = False, []
+        try:
+            for event, data in iter_sse(lines):
+                if data.strip() == "[DONE]":
+                    return
+                error = sse_error(event, data)
+                if error:
+                    raise BackendError(f"Aster reported an error mid-stream: {error}")
+                text = sse_delta(data)
+                if text:
+                    got_text = True
+                    yield text
+                elif text is None and len(skipped) < 1:
+                    skipped.append(data)
+        except BackendError:
+            raise
+        except Exception as exc:
+            if got_text:
+                yield f"\n\n[cut off - Aster's stream broke: {exc}]"
+                return
+            raise BackendError(f"Aster's stream from {self.url} broke: {exc}") from None
+        if not got_text and skipped:
+            raise BackendError(
+                "Aster streamed events but none carried text in a shape this app "
+                f"knows; first was: {skipped[0][:300]}"
+            )
 
     @staticmethod
     def _extract(raw):
@@ -434,6 +620,10 @@ class HttpBackend:
                 val = data.get(key)
                 if isinstance(val, str):
                     return val
+            # Ollama's /api/chat: {"message": {"role", "content"}}
+            msg = data.get("message")
+            if isinstance(msg, dict) and isinstance(msg.get("content"), str):
+                return msg["content"]
         return json.dumps(data)[:2000]
 
 
@@ -499,6 +689,13 @@ class CliBackend:
 
         timer = threading.Timer(timeout, on_timeout)
         timer.start()
+        # Drain stderr alongside stdout: a CLI that logs more than a pipe
+        # buffer's worth to stderr otherwise blocks until the timeout kills it.
+        err_parts = []
+        drain = threading.Thread(
+            target=lambda: err_parts.append(proc.stderr.read() or ""), daemon=True
+        )
+        drain.start()
         got_output = False
         try:
             try:
@@ -512,6 +709,14 @@ class CliBackend:
             proc.wait()
         finally:
             timer.cancel()
+            if proc.poll() is None:
+                # Only reached with the process still up if the phone walked
+                # away mid-reply - nobody's reading, so don't leave it running.
+                proc.kill()
+                proc.wait()
+            drain.join(5)
+            proc.stdout.close()
+            proc.stderr.close()
 
         if got_output:
             if killed.is_set():
@@ -519,7 +724,7 @@ class CliBackend:
                 yield f"\n\n[cut off - Aster hit the {int(timeout)}s timeout]"
             return
 
-        err = (proc.stderr.read() or "").strip()
+        err = "".join(err_parts).strip()
         if killed.is_set():
             raise BackendError(f"Aster timed out after {int(timeout)}s with no output")
         raise BackendError(
@@ -539,7 +744,8 @@ def describe_discovery(found):
     if kinds <= {"ws", "sse"}:
         return (
             f"{found['base']} streams over {'/'.join(sorted(kinds))} "
-            f"({cands[0]['path']}) - this backend only speaks single-shot JSON"
+            f"({cands[0]['path']}) - this backend POSTs, and can read an SSE "
+            "reply, but can't drive a WebSocket or GET-only EventSource"
         )
     return (
         f"{found['base']} has no obviously chat-shaped endpoint; "
@@ -634,7 +840,13 @@ class Comfy:
         try:
             info = self._get("/object_info/CheckpointLoaderSimple")
             node = info.get("CheckpointLoaderSimple", {})
-            opts = node.get("input", {}).get("required", {}).get("ckpt_name", [[]])[0]
+            spec = node.get("input", {}).get("required", {}).get("ckpt_name", [[]])
+            opts = spec[0] if spec else []
+            # Newer ComfyUI reports combos as ["COMBO", {"options": [...]}];
+            # iterating that "COMBO" string gave checkpoints named C, O, M, B.
+            if not isinstance(opts, list):
+                extra = spec[1] if len(spec) > 1 and isinstance(spec[1], dict) else {}
+                opts = extra.get("options") or []
             self._checkpoints = [c for c in opts if isinstance(c, str)]
         except Exception:
             return []
@@ -685,11 +897,11 @@ class Comfy:
             return None
 
     def queued_ids(self):
-        """(running, pending) prompt ids."""
+        """(running, pending) prompt ids, or None if ComfyUI didn't answer."""
         try:
             data = self._get("/queue", timeout=6)
         except Exception:
-            return set(), set()
+            return None
 
         def ids(key):
             out = set()
@@ -868,7 +1080,12 @@ class RenderService:
             pending = [j for j in self.jobs if j["status"] in ("queued", "running")]
         if not pending:
             return
-        running, waiting = self.comfy.queued_ids()
+        queued = self.comfy.queued_ids()
+        if queued is None:
+            # Unreachable is not "gone from the queue" - a busy or restarting
+            # ComfyUI mustn't get every in-flight job marked failed after 30s.
+            return
+        running, waiting = queued
         for job in pending:
             pid = job["promptId"]
             entry = self.comfy.history(pid)
@@ -951,7 +1168,9 @@ def extract_directives(text):
                     spec = {"prompt": salvage.group(1)}
         if spec is None:
             spec = {"prompt": " ".join(body.split())}
-        if (spec.get("prompt") or "").strip():
+        # A model can emit {"prompt": ["a", "b"]}; .strip() on that used to
+        # raise mid-reply, after the phone's stream was already open.
+        if isinstance(spec.get("prompt"), str) and spec["prompt"].strip():
             specs.append(spec)
         return ""
 
@@ -1068,10 +1287,12 @@ def safe_join(root, rel):
     rel = urllib.parse.unquote(rel).lstrip("/")
     if not rel:
         return None
-    target = (root / rel).resolve()
     try:
+        # resolve() raises on a NUL byte (%00), and on Windows on names like
+        # "a<b" - either used to kill the handler thread mid-request.
+        target = (root / rel).resolve()
         target.relative_to(root.resolve())
-    except ValueError:
+    except (ValueError, OSError):
         return None
     return target if target.is_file() else None
 
@@ -1172,7 +1393,10 @@ def thumb_bytes(path, box=420):
         return None
     try:
         st = path.stat()
-        cached = THUMB_DIR / f"{abs(hash((str(path), st.st_mtime_ns)))}.jpg"
+        # hashlib, not hash(): str hashing is salted per process, so hash()
+        # gave every restart fresh keys - the cache never hit and just grew.
+        key = hashlib.sha1(f"{path}|{st.st_mtime_ns}".encode("utf-8")).hexdigest()
+        cached = THUMB_DIR / f"{key}.jpg"
         if cached.is_file():
             return cached.read_bytes()
         from PIL import Image as PILImage
@@ -1714,6 +1938,14 @@ def manifest_for(entry):
     }
 
 
+def token_matches(given, token):
+    """Constant-time compare on bytes: compare_digest raises TypeError on a str
+    with non-ASCII in it, so ?t=%C3%A9 used to crash the request."""
+    if not given or not token:
+        return False
+    return hmac.compare_digest(given.encode("utf-8"), token.encode("utf-8"))
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "AsterApp/1.0"
     app = None  # set to an App instance before serving
@@ -1748,9 +1980,11 @@ class Handler(BaseHTTPRequestHandler):
         if length <= 0 or length > 1_000_000:
             return {}
         try:
-            return json.loads(self.rfile.read(length).decode("utf-8", "replace")) or {}
+            data = json.loads(self.rfile.read(length).decode("utf-8", "replace"))
         except Exception:
             return {}
+        # A JSON list or string is valid JSON but every caller does .get() on it.
+        return data if isinstance(data, dict) else {}
 
     def _query(self):
         return urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
@@ -1768,7 +2002,7 @@ class Handler(BaseHTTPRequestHandler):
                     break
         if not given:
             given = (self._query().get("t") or [""])[0]
-        return bool(given) and hmac.compare_digest(given, token)
+        return token_matches(given, token)
 
     # ---- routes
 
@@ -1796,7 +2030,7 @@ class Handler(BaseHTTPRequestHandler):
             # ?t=<token> once, then a cookie carries it - so <img> tags work too.
             # Both entry points accept it; each redirects back to itself.
             given = (self._query().get("t") or [""])[0]
-            if given and hmac.compare_digest(given, app.token):
+            if token_matches(given, app.token):
                 return self._send(
                     "",
                     "text/plain",
@@ -1957,6 +2191,10 @@ class Handler(BaseHTTPRequestHandler):
                 new_jobs.append(app.renders.queue(spec, source="chat"))
             except BackendError as exc:
                 notes.append(str(exc))
+            except Exception as exc:
+                # e.g. {"steps": "lots"} -> ValueError. Report it in the reply
+                # rather than losing the reply and the done frame with it.
+                notes.append(f"{type(exc).__name__}: {exc}")
 
         text_out = clean or reply.strip()
         if notes:
@@ -1983,7 +2221,7 @@ class Handler(BaseHTTPRequestHandler):
 
 class App:
     def __init__(self, args):
-        self.config, config_error = load_config()
+        self.config, config_error = load_config(CONFIG_PATH)
         self.config_error = config_error
 
         if args.comfy:
@@ -2018,7 +2256,7 @@ class App:
 
         self.comfy = Comfy(self.config)
         self.renders = RenderService(self.config, self.comfy)
-        self.transcript = Transcript()
+        self.transcript = Transcript(CHAT_PATH)
 
         comfy_up, _ = self.comfy.status()
         self.backend, self.backend_notes = build_backend(
@@ -2032,11 +2270,11 @@ class App:
         config string is taken literally; otherwise the detected file is used."""
         if _is_path(configured):
             path = Path(configured).expanduser()
-            return path, (read_text(path) or "")
+            return path, (read_prompt_file(path) or "")
         if isinstance(configured, str) and configured.strip():
             return None, configured.strip()
         if fallback_file:
-            return fallback_file, (read_text(fallback_file) or "")
+            return fallback_file, (read_prompt_file(fallback_file) or "")
         return None, None
 
     def system_prompt(self, comfy_up):

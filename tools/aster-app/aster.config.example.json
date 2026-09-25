@@ -20,7 +20,10 @@
     "style": "auto",
     "model": "aster",
     "headers": {},
-    "timeoutSeconds": 300
+    "timeoutSeconds": 300,
+    "//stream": "true asks Aster to stream (\"stream\": true, Accept: text/event-stream).",
+    "//stream2": "A text/event-stream reply is streamed to the phone live either way.",
+    "stream": false
   },
 
   "//cli": "Use this if Aster is a command. The composed prompt goes in on stdin,",

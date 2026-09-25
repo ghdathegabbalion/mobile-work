@@ -49,9 +49,11 @@ aster web UI: http://127.0.0.1:8787
 ```
 
 Discovery follows same-origin `<script src>` bundles too, so an endpoint that
-only appears in `app.js` is still found. If it picks wrong, or Aster streams over
-SSE/WebSocket (which this backend can't speak yet — it says so rather than
-mis-wiring), set `http.url` explicitly and discovery is skipped.
+only appears in `app.js` is still found. If it picks wrong, set `http.url`
+explicitly and discovery is skipped. An Aster that talks only over a WebSocket,
+or a GET-only `EventSource`, can't be driven by this backend — discovery says so
+rather than mis-wiring. (An Aster that answers the chat POST with an SSE stream
+is fine; see streaming below.)
 
 The three backends, in the order `auto` tries them:
 
@@ -69,6 +71,17 @@ both just need to hand back text.
   `choices[0].message.content`, so anything OpenAI-shaped works as-is.
   `style: "simple"` posts `{message, system, history}` and accepts a reply under
   `reply`, `text`, `content`, or `response` (or plain text). `auto` picks by URL.
+  **Streaming:** if Aster replies `Content-Type: text/event-stream`, each delta
+  reaches the phone as it arrives — the bubble types itself out instead of
+  appearing all at once. This works whether or not you asked for it. Set
+  `http.stream: true` to ask (it sends `"stream": true` and
+  `Accept: text/event-stream`), which is what an OpenAI-shaped server needs. It
+  reads `data:` lines as raw text, OpenAI `choices[0].delta.content`, or
+  `{"text"|"content"|"delta"|"token": …}` (including Anthropic's `delta.text` and
+  TGI's `token.text`), stops at `[DONE]`, and turns `event: error` into an error
+  bubble. If the stream stalls past `timeoutSeconds`, what already arrived is
+  kept and marked `[cut off]`. With `stream` off (the default) the request is
+  byte-for-byte what it was before.
 - **`cli`** — the composed prompt goes in on **stdin**, the reply is read off
   **stdout**. With `command: null` it auto-detects the Claude Code CLI and runs
   `claude -p`. Deliberately no auto-approve flag: a phone-driven agent with
@@ -95,6 +108,9 @@ whole value keeps its type, so `"steps": "%steps%"` stays an integer.
 
 An Aster `*.txt` prompt file, if found, is prepended to every render prompt; a
 `*negative*.txt` becomes the default negative. Override both in the config.
+Lines starting with `#` in those files are notes for people and never reach the
+sampler; the remaining lines are joined into one prompt. (The `.md` design sheet
+goes to chat unchanged.)
 
 ### Renders Aster asks for
 
@@ -184,6 +200,20 @@ Still plain HTTP with no TLS — **keep it on Tailscale.** Don't point ngrok or 
 Cloudflare tunnel at this port. Path traversal outside the output folder is
 refused, and a request that misses locally is only retried through ComfyUI's own
 `/view`, never as a raw path.
+
+## Tests
+
+Stdlib `unittest`, no installs, no network, no GPU. Aster's backend and ComfyUI
+are replaced by tiny stub servers on 127.0.0.1, and the app is served in-process.
+From the repo root:
+
+```
+python -m unittest tools/aster-app/test_server.py
+```
+
+or from this folder, `python test_server.py`. It takes a few seconds. `pytest`
+runs the same file if you have it installed. Nothing it does touches
+`aster.config.json`, `aster.token` or `aster-chat.json`.
 
 ## Notes
 
