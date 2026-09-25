@@ -16,15 +16,6 @@ secrets/
 .idea/
 
 # Model weights & large media — reference C:\Users\GH-DA\ComfyUI-Shared instead
-*.safetensors
-*.ckpt
-*.gguf
-*.pt
-*.pth
-*.bin
-*.mp4
-*.mov
-*.zip
 
 # Python
 __pycache__/
