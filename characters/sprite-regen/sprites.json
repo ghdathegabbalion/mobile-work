@@ -1,0 +1,69 @@
+{
+  "_about": "One entry per sprite in ghdathegabbalion/Aster/sprites/. Each is regenerated img2img off its current file so pose, composition and setting survive while the design moves to canon. 'scene' is appended after characters/aster-prompt.txt. 'fix' names drift seen in the current file, so the checker knows what to look at first. Tune 'denoise' here, not in regen.py.",
+
+  "defaults": {
+    "steps": 30,
+    "cfg": 6.5,
+    "seeds": 2,
+    "denoise": [0.45, 0.55]
+  },
+
+  "full": [
+    {
+      "name": "idle",
+      "scene": "full body, standing, hands clasped in front, lavender cable-knit sweater, white knitted scarf, sunset beach, calm sea, constellation line-art in the sky",
+      "fix": "sweater is white-blue (lock: lavender); tail has no cream fur base; no pouch; no bloom; brown eyes; plain cream paws"
+    },
+    {
+      "name": "wave",
+      "scene": "full body, waving with one hand, lavender cable-knit sweater, white knitted scarf, beach at sunset, waves",
+      "fix": "the style reference — change as little as possible; no bloom; brown eyes; coral tail transition; plain cream paws"
+    },
+    {
+      "name": "happy",
+      "scene": "full body, jumping, laughing with open mouth, white t-shirt with violet star print, navy shorts, splashing in the ocean, bright blue sky, white clouds",
+      "fix": "TWO TAILS (cream fox tail plus separate tentacle) — the worst sprite; no scarf; no pouch. Expect to need the 0.55 pass or an inpaint on the tail",
+      "denoise": [0.55, 0.62]
+    },
+    {
+      "name": "dance",
+      "scene": "full body, dancing, arms raised, eyes closed, smiling, white sundress, straw sun hat, lavender neckerchief, desert dunes at sunset",
+      "fix": "tail is all tentacle with no cream fur base or marigold band; no pouch; no bloom (hat may hide the ear base: bloom on the hat band is acceptable)"
+    },
+    {
+      "name": "think",
+      "scene": "sitting in a plum velvet armchair, reading a book, round reading glasses, lavender turtleneck sweater, cosy night library, bookshelves",
+      "fix": "no scarf; no pouch; no bloom; tail base hidden by the chair — the marigold band must still show where the tail emerges"
+    },
+    {
+      "name": "sleepy",
+      "scene": "upper body, yawning, holding a mug of cocoa with whipped cream, oversized lavender sweater, messy blonde bob, bedroom, morning window light, star-patterned bedding",
+      "fix": "hair merges into head fur; tail barely visible; no pouch, bloom or ink paws. Pouch on a bedroom sprite is canon now (every outfit)"
+    },
+    {
+      "name": "excited",
+      "scene": "full body, jumping with joy, glowing violet magic circles, lavender cable-knit sweater, white knitted scarf, rocky beach at sunset, constellations",
+      "fix": "the only sprite that already has ink paws — keep them; cream tail and tentacle read as two limbs; no bloom; no pouch"
+    },
+    {
+      "name": "shy",
+      "scene": "full body, bashful, holding sweater hem, lavender cable-knit sweater, white knitted scarf, standing in shallow sea at sunset",
+      "fix": "cream constellation tail and tentacle read as two limbs; no pouch; no bloom; brown eyes"
+    }
+  ],
+
+  "chibi": {
+    "_about": "Desktop-pet cutouts. Rendered on a flat mint background so cutout.ps1 can key it out — mint is far from cream fur, lavender and ink-violet, so the flood fill stops cleanly at her edge. The source cutout is composited onto that mint inside the graph, because a transparent PNG fed straight to img2img comes out on black.",
+    "background": "(plain flat mint green background:1.3), simple background, no scenery",
+    "background_rgb": [191, 232, 208],
+    "prefix": "chibi, super deformed, big head, stubby limbs, full body, lavender cable-knit sweater, white knitted scarf",
+    "denoise": [0.55, 0.65],
+    "frames": [
+      { "name": "idle_cut",    "scene": "standing, gentle smile, paws at sides" },
+      { "name": "think_cut",   "scene": "thinking, paw on chin, looking up" },
+      { "name": "sleepy_cut",  "scene": "yawning, eyes closed, drowsy" },
+      { "name": "wave_02_cut", "scene": "waving, paw raised to shoulder height", "pair": "wave" },
+      { "name": "wave_03_cut", "scene": "waving, paw raised high above head", "pair": "wave" }
+    ]
+  }
+}

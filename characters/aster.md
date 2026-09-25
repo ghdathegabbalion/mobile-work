@@ -26,6 +26,10 @@ the other. Each has a designated reference image.
 | **Full** | `ref/aster-ref.png` | The eight emote sprites in `sprites/` | Slender anthro, full illustrated backgrounds, painterly |
 | **Chibi** | `ref/aster-ref-chibi.png` | The `_cut` cutouts driving the desktop pet | Big head, stubby limbs, transparent background, simplified linework |
 
+**The chibi carries every locked trait below.** The bob, the bloom, amber eyes, the marigold
+band, ink paws, the pouch. It is the same character drawn simpler, not a reduced design.
+Simplify the linework, never the list. *(Decided by Kaarten, 2026-09-25.)*
+
 ### The three reference files, and what each is for
 
 They are not interchangeable. Pick by what you need.
@@ -75,17 +79,23 @@ style on the PC (`../docs/aster-render-on-pc.md`), and this three-way split coll
   moon pouch. Keep it small; it should not compete with the pouch.
 - **Ink-dipped extremities:** cream forearm fur darkening into violet hands with mauve-pink
   pads; cream legs darkening into violet feet with mauve pads. Soft smoky gradient, never a
-  hard line. *This is the meaning of "warm above, deep below."*
+  hard line. *This is the meaning of "warm above, deep below."* **Required on every sprite,
+  both forms**, not an occasional flourish. *(Decided by Kaarten, 2026-09-25.)*
 - **Moon pouch:** a **brown leather belt-pouch worn across the hips, with a gold crescent
   moon on the flap.** Clearest on the chibi/desktop form; visible as the strap and hip bag
-  in `wave.png`. It is her most distinctive object — keep it.
+  in `wave.png`. It is her most distinctive object — keep it. **Worn with every outfit**,
+  sundress and pyjamas included. *(Decided by Kaarten, 2026-09-25.)*
 - **Scarf:** long **white knitted scarf** with fringed ends, wound at the neck.
+- **Sweater colour: lavender.** When she wears a sweater (her signature cable-knit, a
+  turtleneck, an oversized one) it is lavender. White sweaters are retired: the chibi
+  cutouts' grey-white ones are drift. Other garments are still free. *(Decided by Kaarten,
+  2026-09-25; previously lavender or white.)*
 
 ## Free to vary — not drift, don't "correct" it
 
-- **Outfits.** Cable-knit sweater (lavender or white), tee and shorts, sundress and straw
-  hat, star-patterned pyjamas, round reading glasses. Wardrobe is hers to change.
-- **Sweater colour** specifically — lavender and white are both canon.
+- **Outfits.** Cable-knit sweater, tee and shorts, sundress and straw hat, star-patterned
+  pyjamas, round reading glasses. Wardrobe is hers to change, as long as the pouch comes
+  along and any sweater is lavender.
 - **Backgrounds.** Sunset shore, desert dunes, night library, bedroom. Constellation
   line-art in the sky is a recurring motif and always welcome.
 
@@ -203,6 +213,10 @@ These traits — the marigold band, the aster bloom, amber eyes, and ink-dipped 
 set**. The twelve sprites predate the decision. Until they are regenerated, her deployed art
 and this sheet disagree, and **this sheet wins**.
 
-Regenerating them needs her LoRA on the PC — see `../docs/aster-render-on-pc.md`, which
-carries the sprite-regeneration procedure including the alpha-channel step for the desktop
-cutouts. That is owed work, tracked here so it is not forgotten.
+The 2026-09-25 decisions widen it: the chibi cutouts owe the full trait list too, every
+sprite owes the pouch and ink paws, and white sweaters become lavender.
+
+Regenerating them needs her LoRA on the PC. **`sprite-regen/` is the ready-made batch**:
+one command renders candidates for all 13 sprites img2img off themselves, and its README
+carries the checklist and the cutout/alpha step. That is owed work, tracked here so it is
+not forgotten.

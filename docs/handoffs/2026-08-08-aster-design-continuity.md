@@ -52,6 +52,10 @@ consistently.
 
 ## Open questions
 
+> **Resolved 2026-09-25 by Kaarten:** ink paws are required on every sprite; sweaters are
+> lavender (white retired); the orange proposal was taken as the warm accents on 08-08.
+> The record is now `characters/aster.md`. The notes below are kept as history.
+
 - **Ink-dipped paws** are in the spec as canon, but appear in only one of four full sprites.
   Locking them in means the existing sprite set is partially non-conforming. Accepted on the
   reasoning that "warm above, deep below" should be a rule rather than a one-off — but it is
