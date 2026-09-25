@@ -59,9 +59,9 @@ class StubComfy(BaseHTTPRequestHandler):
         if path.startswith("/history/"):
             pid = path.rsplit("/", 1)[1]
             prefix = self.graphs[int(pid)]["30"]["inputs"]["filename_prefix"]
+            sub, _, name = prefix.rpartition("/")
             return self._json({pid: {"status": {"status_str": "success"}, "outputs": {
-                "30": {"images": [{"filename": prefix.rsplit("/", 1)[1] + "_00001_.png",
-                                   "subfolder": prefix.rsplit("/", 1)[0]}]}}}})
+                "30": {"images": [{"filename": name + "_00001_.png", "subfolder": sub}]}}}})
         self._json({}, 404)
 
     def do_POST(self):
@@ -144,7 +144,9 @@ class RegenTests(unittest.TestCase):
         self.assertNotIn("11", g)  # no background composite for full sprites
         self.assertTrue(g["3"]["inputs"]["text"].startswith("asterfen,"))
         self.assertIn("splashing in the ocean", g["3"]["inputs"]["text"])
-        self.assertTrue(g["30"]["inputs"]["filename_prefix"].startswith("aster/regen-"))
+        prefix = g["30"]["inputs"]["filename_prefix"]
+        self.assertTrue(prefix.startswith("ASTER_regen-"))   # her gallery's "Hers" filter
+        self.assertNotIn("/", prefix)  # her gallery only lists the output folder's top level
 
     def test_chibi_gets_flat_background_and_keeps_its_size(self):
         self.assertEqual(self.run_regen("--only", "wave_02_cut", "--seeds", "1",
@@ -194,8 +196,8 @@ class RegenTests(unittest.TestCase):
         self.assertEqual(StubComfy.uploads, ["idle_cut.png"])  # one upload for all frames
         prefixes = [g["30"]["inputs"]["filename_prefix"] for g in StubComfy.graphs]
         self.assertEqual(len(prefixes), 2)
-        self.assertTrue(prefixes[0].split("/")[-1].startswith("think_01_cut_d72_"))
-        self.assertTrue(prefixes[1].split("/")[-1].startswith("think_02_cut_d72_"))
+        self.assertIn("_think_01_cut_d72_", prefixes[0])
+        self.assertIn("_think_02_cut_d72_", prefixes[1])
         self.assertEqual(StubComfy.graphs[0]["14"]["inputs"]["width"], 1024)  # chibi path
 
     def test_dry_run_touches_nothing(self):

@@ -7,8 +7,9 @@ Runs on the PC against the local ComfyUI (port 8000), with her LoRA. Stdlib only
     python regen.py --sprites ... --dry-run                              # print, queue nothing
     python regen.py --sprites ... --frames --priority 1                  # animation frames
 
-Renders land in ComfyUI's own output folder under aster/regen-<stamp>/, which the
-aster-app gallery already browses. Nothing is written into this repo, and nothing in
+Renders land directly in ComfyUI's output folder as ASTER_regen-<stamp>_<name>_...png:
+flat, because her app's Gallery tab only shows files at the top of that folder, and the
+ASTER prefix puts them under its "Hers" filter. Nothing is written into this repo, and nothing in
 the Aster repo is overwritten — picking winners and copying them over is a human step.
 See README.md.
 """
@@ -336,7 +337,7 @@ def main(argv=None):
             continue
         if source not in uploaded:
             uploaded[source] = comfy.upload(src)
-        prefix = f"aster/regen-{stamp}/{j['name']}_d{round(j['denoise'] * 100)}_s{j['seed']}"
+        prefix = f"ASTER_regen-{stamp}_{j['name']}_d{round(j['denoise'] * 100)}_s{j['seed']}"
         graph = build_graph(j, uploaded[source], f"{base}, {j['scene']}", negative, prefix,
                             args.model, args.lora,
                             size=png_size(src) if j["form"] == "chibi" else None, bg_rgb=bg)
@@ -345,7 +346,7 @@ def main(argv=None):
         done.extend(files)
         print(f"[{n}/{len(jobs)}] {j['name']} d{j['denoise']:.2f} s{j['seed']} -> {files[0]}")
 
-    print(f"\n{len(done)} renders in ComfyUI's output folder, aster/regen-{stamp}/")
+    print(f"\n{len(done)} renders in ComfyUI's output folder as ASTER_regen-{stamp}_*")
     print("Pick winners against the checklist in characters/sprite-regen/README.md.")
     return 0
 

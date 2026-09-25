@@ -63,6 +63,13 @@ The real art workspace lives at `C:\Users\GH-DA\ComfyUI-Shared`:
 
 ## Phone-facing tools (they run on the PC, you reach them from the phone)
 
-`tools/aster-app/` is the only one — a stdlib-only Python server pinned to the phone home screen over Tailscale. Chat with Aster, queue renders, browse the output folder. Aster's chat backend is pluggable and self-discovering; `python server.py --probe` reports what it actually resolved. Read its README before changing it.
+There is **one** phone app, and it lives in Aster's own repo (`ghdathegabbalion/Aster`):
+her companion server, installed as a PWA over Tailscale. It has Chat (streaming, her
+tools, duets, voice), Render, and Gallery tabs. `/` opens on Chat, and `/gallery` installs
+as a second "Aster Gallery" icon. Its security model, including what the phone can never
+do, is in that repo's `PHONE.md`. Read it before changing anything.
 
-It serves two home-screen icons from one process: `/` opens on Chat, `/gallery` opens on the renders grid. `tools/render-gallery/` was retired into that second entry point — don't recreate it.
+`tools/aster-app/` (here) and `tools/render-gallery/` were both retired into it, on
+2026-09-25 and 2026-07-28. Don't recreate either. Her app reads her canon prompt and
+negative from `characters/` in this repo when the folder exists at
+`%USERPROFILE%\mobile-work\characters`.

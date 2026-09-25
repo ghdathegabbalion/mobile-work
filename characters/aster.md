@@ -120,8 +120,9 @@ The fix is not better wording. It is **her LoRA plus a reference image** — see
 - **Base checkpoint:** `furrytoonmix_xlIllustriousV2.safetensors`
 - **Local ComfyUI:** `http://127.0.0.1:8000` — free, on the PC's own GPU
 - Prompt files: `aster-prompt.txt` (positive), `aster-negative.txt` (negative)
-- Ready-made graph: `aster-workflow.json` — LoRA wired in, uses the aster-app's
-  `%positive%` / `%negative%` / `%seed%` / `%steps%` / `%cfg%` / `%width%` / `%height%` /
+- Ready-made graph: `aster-workflow.json` — LoRA wired in, uses the `%placeholder%`
+  convention her app's Render tab fills in (copy it into `ComfyUI-Shared\workflows\` to
+  pick it there): `%positive%` / `%negative%` / `%seed%` / `%steps%` / `%cfg%` / `%width%` / `%height%` /
   `%model%` / `%prefix%` placeholders
 - Step-by-step: `../docs/aster-render-on-pc.md`
 
@@ -173,7 +174,7 @@ reproduces how she actually looks.
 ## Why the warm accents — the reasoning, so it can be argued with
 
 Asters are violet petals around a **gold centre**, and the aster-bloom app icon
-(`tools/aster-app/server.py:1251`) was already hand-drawn as "violet petals, gold centre".
+(in the since-retired `tools/aster-app`) was already hand-drawn as "violet petals, gold centre".
 Warm gold-orange against violet is her namesake's own palette — it was latent in her from
 the start and simply never made it onto her. Orange is also the direct complement of violet,
 and without it her palette is analogous: soft, but low-contrast, with the ink-purple doing

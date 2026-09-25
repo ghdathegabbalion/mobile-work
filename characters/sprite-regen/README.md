@@ -26,9 +26,9 @@ run is **52 renders**: 13 sprites × 2 denoise strengths × 2 seeds. Handy flags
 | `--seeds 4` | more candidates per strength |
 | `--denoise 0.5` | one strength for everything, overriding `sprites.json` |
 
-Output goes to ComfyUI's output folder under `aster/regen-<date-time>/`, named
-`<sprite>_d<denoise>_s<seed>`. The aster-app Gallery tab shows it, so you can pick from
-the phone. **Nothing is overwritten**, in this repo or in hers.
+Output goes straight into ComfyUI's output folder, named
+`ASTER_regen-<date-time>_<sprite>_d<denoise>_s<seed>`. Her app's **Gallery** tab shows
+them under the **✳ Hers** filter, so you can pick from the phone. **Nothing is overwritten**, in this repo or in hers.
 
 Tuning lives in `sprites.json`: per-sprite scene text, denoise, and a `fix` note saying
 what's wrong with the current file.
