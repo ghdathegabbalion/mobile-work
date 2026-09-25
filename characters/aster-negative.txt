@@ -1,0 +1,36 @@
+worst quality, low quality, jpeg artifacts, blurry, lowres,
+bad anatomy, bad hands, extra fingers, extra limbs, deformed, mutated,
+cropped, out of frame, text, watermark, signature, logo,
+multiple views, character sheet, duplicate character,
+nsfw, nude, topless, exposed chest,
+
+(two tails:1.4), (multiple tails:1.4), (fox tail:1.3), (bushy fox tail:1.2),
+(multiple tentacles:1.4), (extra tentacle:1.3), (many arms:1.3), (tentacle arms:1.2),
+separate tentacle, detached tail, second tail,
+
+bald head, no hair, missing bangs,
+tailless, missing tail,
+orange fur, red fur, ginger fur,
+hard edged gloves, purple gloves, purple socks
+
+# The weighted block is not generic — each entry targets an observed failure:
+#
+#   two tails / fox tail / multiple tentacles
+#       The dominant failure. Models draw a cream fox tail AND a separate purple tentacle
+#       instead of one limb that changes along its length. Her own companion server
+#       already carries "fox tail, multiple tentacles" here for the same reason.
+#
+#   many arms / tentacle arms
+#       Leakage from her persona's "many arms for parallel work" metaphor.
+#
+#   bald head / missing bangs
+#       Her blonde bob merges into her head fur in half her existing sprites.
+#
+#   orange fur / red fur
+#       Keeps her distinct from Kaarten, who is red/gold. Warm accents are fine;
+#       an orange coat is not.
+#
+#   hard edged gloves / purple socks
+#       Her ink-dipped paws are a soft gradient, not worn items.
+#
+# SDXL/Illustrious only — Flux ignores negative prompts.
