@@ -167,6 +167,37 @@ class RegenTests(unittest.TestCase):
         self.assertEqual(self.run_regen("--only", "idle", "happy", "--seeds", "1"), 0)
         self.assertEqual(StubComfy.uploads, ["happy.png"])
 
+    def test_frames_cover_the_pet_spec_and_share_seeds_per_clip(self):
+        jobs = regen.plan_frame_jobs(regen.load_manifest())
+        names = {j["name"] for j in jobs}
+        self.assertEqual(len(names), 68)
+        self.assertIn("dance_08_cut", names)
+        self.assertIn("wave_01_cut", names)
+        self.assertTrue(all(j["source"] == "idle_cut" and j["form"] == "chibi" for j in jobs))
+        dance = {(j["seed"], j["denoise"]) for j in jobs if j["name"].startswith("dance_")}
+        self.assertEqual(len(dance), 1)  # one look for the whole clip
+        self.assertIn("flat mint green background", jobs[0]["scene"])
+
+    def test_frame_priority_and_only_filters(self):
+        m = regen.load_manifest()
+        p1 = {j["name"].rsplit("_", 2)[0] for j in regen.plan_frame_jobs(m, priority=1)}
+        self.assertEqual(p1, {"wave", "happy", "dance", "celebrate"})
+        only = regen.plan_frame_jobs(m, only=["spin"])
+        self.assertEqual([j["name"] for j in only],
+                         [f"spin_{n:02d}_cut" for n in range(1, 6)])
+        with self.assertRaises(SystemExit):
+            regen.plan_frame_jobs(m, only=["moonwalk"])
+
+    def test_frames_render_off_idle_and_save_under_frame_names(self):
+        tiny_png(self.sprites / "idle_cut.png", 512, 640)
+        self.assertEqual(self.run_regen("--frames", "--only", "think"), 0)
+        self.assertEqual(StubComfy.uploads, ["idle_cut.png"])  # one upload for all frames
+        prefixes = [g["30"]["inputs"]["filename_prefix"] for g in StubComfy.graphs]
+        self.assertEqual(len(prefixes), 2)
+        self.assertTrue(prefixes[0].split("/")[-1].startswith("think_01_cut_d72_"))
+        self.assertTrue(prefixes[1].split("/")[-1].startswith("think_02_cut_d72_"))
+        self.assertEqual(StubComfy.graphs[0]["14"]["inputs"]["width"], 1024)  # chibi path
+
     def test_dry_run_touches_nothing(self):
         self.assertEqual(regen.main(["--dry-run", "--only", "dance", "--comfy", "http://127.0.0.1:9"]), 0)
         self.assertEqual(StubComfy.graphs, [])
