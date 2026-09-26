@@ -1,0 +1,8 @@
+{
+  "_about": "Per-image caption overrides for caption.py, keyed by filename stem (the dataset file's or its source's). 'tags' are added as variable tags; 'replace': true uses only them (no shot/outfit/scene tags); 'form' and 'shot' override curate.py's. Never put locked canon tags or the trigger here: caption.py adds those. Put dataset-specific overrides in DATASET/overrides.json; they win over this file.",
+  "aster-ref": {
+    "form": "full",
+    "shot": "full_front",
+    "tags": "standing, front view, arms at sides, lavender cable-knit sweater, belt, simple background, gradient background"
+  }
+}

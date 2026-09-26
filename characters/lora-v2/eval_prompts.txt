@@ -1,0 +1,27 @@
+# Fixed v1-vs-v2 evaluation grid for Aster's LoRA. Used by compare.py; scored with compare.md.
+#
+#   id | mode | text
+#
+# mode "bare":  positive = "asterfen, <text>". Tests what the LoRA holds from the trigger
+#               alone. This is the real question for v2: v1 needed the whole canon prompt
+#               and still missed the band, bloom, eyes and paws.
+# mode "canon": positive = characters/aster-prompt.txt + ", <text>". Tests the LoRA under
+#               her normal production prompt.
+#
+# Negative is always characters/aster-negative.txt. Do not name canon traits in "bare"
+# lines: that would test the prompt, not the LoRA. Change this file only between
+# comparisons, never in the middle of one; the grid is only fair if it is fixed.
+# ids: letters, digits and underscores only (they go into output filenames).
+
+front       | bare  | full body, standing, front view, simple background
+back_tail   | bare  | full body, from behind, looking back over shoulder, simple background
+side_walk   | bare  | full body, from side, walking, simple background
+face        | bare  | portrait, close-up, looking at viewer, smiling, simple background
+paws_sit    | bare  | full body, sitting on the floor, hands on knees, barefoot, simple background
+sweater     | bare  | full body, standing, sweater, cosy bedroom
+sundress    | bare  | full body, white sundress, straw sun hat, desert dunes at sunset
+pyjamas     | bare  | full body, star-patterned pyjamas, holding a pillow, bedroom at night
+chibi       | bare  | chibi, super deformed, big head, full body, standing, plain flat mint green background
+canon_front | canon | full body, standing, front view, lavender cable-knit sweater, simple background
+canon_back  | canon | full body, from behind, looking back over shoulder, lavender cable-knit sweater, simple background
+canon_chibi | canon | chibi, super deformed, big head, stubby limbs, full body, waving, plain flat mint green background

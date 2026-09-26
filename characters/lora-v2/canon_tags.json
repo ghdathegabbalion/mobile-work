@@ -1,0 +1,81 @@
+{
+  "_about": "Single source for the LoRA v2 pipeline: caption tags, the curation checklist, hard exclusions, shot types, the target mix and banned phrases. Derived from characters/aster.md (Locked traits). test_lora_v2.py checks that every 'evidence' string still appears in aster.md, so if the sheet changes, this file must change with it.",
+  "trigger": "asterfen",
+  "locked": [
+    {"trait": "Species/build", "tags": ["anthro", "fennec fox", "slender", "digitigrade"],
+     "evidence": ["anthro fennec fox", "slender", "digitigrade"]},
+    {"trait": "Fur", "tags": ["cream fur"],
+     "evidence": ["creamy off-white"]},
+    {"trait": "Hair", "check": "blonde_bob", "tags": ["blonde bob", "blunt bangs"],
+     "evidence": ["blonde bob with straight blunt bangs"]},
+    {"trait": "Ears", "tags": ["huge fennec ears", "apricot inner ears"],
+     "evidence": ["enormous upright fennec ears", "apricot-pink inside"]},
+    {"trait": "Forehead", "tags": ["golden forehead chevron"],
+     "evidence": ["golden-tan chevron"]},
+    {"trait": "Eyes", "check": "amber_eyes", "tags": ["amber eyes"],
+     "evidence": ["warm amber-gold", "Amber, not brown"]},
+    {"trait": "Face", "tags": ["freckles"],
+     "evidence": ["freckles across the muzzle"]},
+    {"trait": "Tail", "check": "one_tail",
+     "tags": ["single tail", "fox fur tail base", "ink-violet tentacle tail", "mauve suckers"],
+     "evidence": ["Exactly one tail", "Thick cream fox fur at the base", "ink-violet tentacle", "pale mauve suckers"]},
+    {"trait": "Tail", "check": "marigold_band", "tags": ["marigold tail band"],
+     "evidence": ["marigold/amber band", "canon, not optional"]},
+    {"trait": "Aster bloom", "check": "aster_bloom", "tags": ["aster flower at left ear"],
+     "evidence": ["aster flower worn at the base of her left ear", "violet petals, gold centre"]},
+    {"trait": "Ink-dipped extremities", "check": "ink_paws", "tags": ["ink-dipped paws"],
+     "evidence": ["violet hands", "violet feet", "Required on every sprite"]},
+    {"trait": "Moon pouch", "check": "moon_pouch", "tags": ["brown leather hip pouch", "gold crescent moon"],
+     "evidence": ["brown leather belt-pouch", "gold crescent moon", "Worn with every outfit"]},
+    {"trait": "Scarf", "tags": ["white knitted scarf"],
+     "evidence": ["white knitted scarf"]},
+    {"trait": "Sweater colour", "check": "lavender_sweater", "when": "sweater", "tags": ["lavender sweater"],
+     "evidence": ["Sweater colour: lavender", "White sweaters are retired"]}
+  ],
+  "forms": {
+    "full": [],
+    "chibi": ["chibi", "super deformed"]
+  },
+  "checklist": [
+    {"id": "one_tail", "label": "Exactly one tail: cream fur, then marigold band, then ink-violet tentacle, one continuous limb"},
+    {"id": "marigold_band", "label": "Marigold band at the transition (not coral)"},
+    {"id": "aster_bloom", "label": "Aster bloom at the LEFT ear: small, violet petals, gold centre"},
+    {"id": "moon_pouch", "label": "Moon pouch: brown leather, gold crescent"},
+    {"id": "amber_eyes", "label": "Amber eyes, not brown"},
+    {"id": "ink_paws", "label": "Ink-dipped paws: soft gradient on hands and feet, not gloves"},
+    {"id": "blonde_bob", "label": "Blonde bob with bangs, visible and not merged into head fur"},
+    {"id": "lavender_sweater", "label": "Any sweater is lavender (n/a if she wears no sweater)"}
+  ],
+  "exclude": [
+    {"id": "two_tails", "label": "Two tails, or a fox tail plus a separate tentacle", "evidence": "Two tails"},
+    {"id": "brown_eyes", "label": "Brown eyes", "evidence": "Amber, not brown"},
+    {"id": "coral_band", "label": "Coral/pink tail transition (old palette)", "evidence": "coral"},
+    {"id": "white_sweater", "label": "White or grey-white sweater", "evidence": "White sweaters are retired"},
+    {"id": "missing_pouch", "label": "Pouch should be in frame but is missing", "evidence": "Worn with every outfit"},
+    {"id": "orange_fur", "label": "Orange or red fur", "evidence": "Never put orange in her fur"}
+  ],
+  "shots": {
+    "full_front": {"label": "Full body, front or 3/4", "tags": ["full body"]},
+    "back_view": {"label": "Back view, the ONE tail clearly visible", "tags": ["full body", "from behind", "looking back"]},
+    "side_view": {"label": "Side view", "tags": ["full body", "from side"]},
+    "upper_body": {"label": "Upper body / portrait (face, bloom, eyes, bob)", "tags": ["upper body"]},
+    "tail_closeup": {"label": "Close-up of the tail band", "tags": ["close-up", "tail focus"]},
+    "paws_closeup": {"label": "Close-up of hands or feet", "tags": ["close-up", "hand focus"]}
+  },
+  "mix": {
+    "total": [25, 40],
+    "form": {"full": [18, 28], "chibi": [7, 12]},
+    "shot": {"full_front": [8, 14], "back_view": [4, 6], "side_view": [2, 4],
+             "upper_body": [4, 6], "tail_closeup": [2, 3], "paws_closeup": [2, 3]},
+    "max_share_one_outfit": 0.4,
+    "min_simple_background_share": 0.3
+  },
+  "banned_substrings": [
+    "many arms", "parallel work", "big ears for listening",
+    "warm above", "deep below",
+    "two tails", "multiple tails", "second tail", "extra tail",
+    "multiple tentacles", "extra tentacle", "tentacle arms",
+    "brown eyes", "coral", "white sweater", "orange fur", "red fur"
+  ],
+  "banned_tags": ["fox tail", "tentacles", "octopus", "gloves", "purple gloves", "socks"]
+}

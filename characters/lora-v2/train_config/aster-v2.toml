@@ -1,0 +1,50 @@
+# kohya sd-scripts: sdxl_train_network.py --config_file aster-v2.toml
+# Hyperparameters only. Paths (checkpoint, dataset, output, sample prompts) are passed by
+# train.ps1 on the command line, which overrides anything here. sd-scripts flattens the
+# [sections] below; they exist for reading, not for the trainer.
+# Why each value: ../README.md -> "Training defaults".
+
+[model]
+v2 = false
+v_parameterization = false          # furrytoonmix / Illustrious are epsilon-prediction
+no_half_vae = true                  # the SDXL VAE overflows to NaN (black latents) in fp16
+
+[network]
+network_module = "networks.lora"
+network_dim = 16
+network_alpha = 8
+network_train_unet_only = true      # SDXL's two text encoders are left alone (see README)
+
+[optimizer]
+optimizer_type = "AdamW8bit"
+unet_lr = 1e-4
+learning_rate = 1e-4
+lr_scheduler = "cosine"
+lr_warmup_steps = 100
+max_grad_norm = 1.0
+
+[training]
+max_train_epochs = 12
+seed = 20260926
+mixed_precision = "bf16"            # train.ps1 -Fp16 for pre-RTX-30 cards
+save_precision = "fp16"
+gradient_checkpointing = true
+sdpa = true
+max_token_length = 225              # her captions run ~90 CLIP tokens; 75 would truncate them
+noise_offset = 0.0357
+min_snr_gamma = 5
+cache_latents = true
+cache_latents_to_disk = true        # latents live in .npz next to the images, not in RAM
+max_data_loader_n_workers = 0       # each Windows worker is a new process with its own torch
+persistent_data_loader_workers = false
+
+[saving]
+output_name = "aster-illustrious-v2"
+save_model_as = "safetensors"
+save_every_n_epochs = 2             # 6 checkpoints to compare: epochs 2, 4, ... 12
+
+[sampling]
+sample_sampler = "euler_a"          # sample_every_n_epochs is added by train.ps1 unless -NoSamples
+
+[logging]
+log_prefix = "aster-v2"
