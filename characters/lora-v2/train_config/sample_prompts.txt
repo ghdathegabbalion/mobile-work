@@ -1,0 +1,16 @@
+# Sample images rendered during training (every 2 epochs; train.ps1 -NoSamples to skip).
+# sd-scripts format: prompt --n negative --w W --h H --d seed --l cfg --s steps
+# Trigger plus scene only: canon traits are NOT named, so the samples show what the LoRA
+# itself has learned. Fixed seeds, so epoch N and epoch N+2 are directly comparable.
+# One line per canon trait worth watching:
+#   front      - overall design, pouch, eyes, bob          back_tail - ONE tail from behind
+#   face       - aster bloom at the LEFT ear, amber eyes    paws      - ink-dipped hands and feet
+#   sundress   - pouch with a non-sweater outfit            sweater   - sweater comes out lavender
+#   chibi      - the chibi form keeps every trait
+asterfen, full body, standing, front view, simple background --n worst quality, low quality, two tails, multiple tails, fox tail, multiple tentacles, brown eyes, orange fur --w 832 --h 1216 --d 1001 --l 6.5 --s 28
+asterfen, full body, from behind, looking back over shoulder, simple background --n worst quality, low quality, two tails, multiple tails, fox tail, multiple tentacles, brown eyes, orange fur --w 832 --h 1216 --d 1002 --l 6.5 --s 28
+asterfen, portrait, close-up, looking at viewer, smiling, simple background --n worst quality, low quality, brown eyes, orange fur --w 1024 --h 1024 --d 1003 --l 6.5 --s 28
+asterfen, full body, sitting on the floor, hands on knees, barefoot, simple background --n worst quality, low quality, two tails, gloves, socks, orange fur --w 832 --h 1216 --d 1004 --l 6.5 --s 28
+asterfen, full body, white sundress, straw sun hat, desert dunes at sunset --n worst quality, low quality, two tails, multiple tails, fox tail, multiple tentacles, brown eyes, orange fur --w 832 --h 1216 --d 1005 --l 6.5 --s 28
+asterfen, full body, standing, sweater, cosy bedroom --n worst quality, low quality, two tails, multiple tails, fox tail, white sweater, brown eyes, orange fur --w 832 --h 1216 --d 1006 --l 6.5 --s 28
+asterfen, chibi, super deformed, big head, full body, standing, plain flat mint green background --n worst quality, low quality, two tails, multiple tails, fox tail, brown eyes --w 1024 --h 1024 --d 1007 --l 6.5 --s 28

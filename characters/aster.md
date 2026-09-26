@@ -126,6 +126,13 @@ The fix is not better wording. It is **her LoRA plus a reference image** — see
   `%model%` / `%prefix%` placeholders
 - Step-by-step: `../docs/aster-render-on-pc.md`
 
+**v1 predates the current canon.** It never saw the marigold band, the aster bloom, amber
+eyes, ink-dipped paws as a rule, the lavender-sweater rule, the pouch in every outfit, or a
+full-canon chibi, so the prompt has to fight it for all of them. **`lora-v2/`** is the kit
+for `aster-illustrious-v2`: curate ~30 canon-correct images, caption them from one tag file
+(`canon_tags.json`, derived from the locked traits below), train with kohya on the PC, and
+score v1 against v2 on a fixed grid. PC only; its README has the commands.
+
 ### Cloud text-to-image does not work for her — evidence, so nobody repeats it
 
 Three attempts on Comfy Cloud, `bfl/flux-2-pro`, 2026-08-08:

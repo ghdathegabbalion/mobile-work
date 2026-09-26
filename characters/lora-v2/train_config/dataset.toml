@@ -1,0 +1,24 @@
+# kohya sd-scripts dataset config: --dataset_config
+# train.ps1 writes a resolved copy (dataset.resolved.toml, in the output folder) with the
+# real image folder in place of __DATASET_DIR__ and num_repeats computed from the image
+# count. Edit this template, not the copy.
+
+[general]
+caption_extension = ".txt"
+shuffle_caption = true
+keep_tokens = 1          # must equal caption.py --shuffle-keep: `asterfen` is never shuffled
+flip_aug = false         # NEVER flip: the aster bloom is at her LEFT ear, the tail on her right
+color_aug = false        # her palette is the point; also incompatible with cache_latents
+
+[[datasets]]
+resolution = [1024, 1024]
+batch_size = 1
+enable_bucket = true
+bucket_no_upscale = true # curate.py already sized every image to an exact SDXL bucket
+min_bucket_reso = 512
+max_bucket_reso = 1536
+bucket_reso_steps = 64
+
+  [[datasets.subsets]]
+  image_dir = '__DATASET_DIR__'
+  num_repeats = 6        # train.ps1: round(180 / images), so ~180 steps per epoch
