@@ -73,16 +73,13 @@ Score each against the locked traits in `aster.md`. The first one is the one tha
 ## Then
 
 Commit the winner as `characters/ref/aster-ref.png`, note in `aster.md` which mode and
-denoise produced it, and point the aster-app at the graph so every future render is
-conditioned:
+denoise produced it. To condition every render in her app on the graph, copy
+`characters\aster-workflow.json` into `C:\Users\GH-DA\ComfyUI-Shared\workflows\` and pick
+it in the Render tab's workflow menu.
 
-```json
-"comfy": { "workflow": "C:\\Users\\GH-DA\\mobile-work\\characters\\aster-workflow.json" }
-```
-
-`characters/aster-prompt.txt` and `aster-negative.txt` are picked up automatically by
-`find_character_files()` in `tools/aster-app/server.py` once they exist — which, as of this
-commit, they do. Confirm with `python server.py --probe`.
+Her app (`ghdathegabbalion/Aster`) reads `characters/aster-prompt.txt` and
+`aster-negative.txt` from this repo automatically, with `#` comment lines stripped, and
+applies them whenever the Render tab's "Her canon" switch is on (the default).
 
 ## Owed work — regenerating the sprite set
 

@@ -26,12 +26,37 @@ run is **52 renders**: 13 sprites × 2 denoise strengths × 2 seeds. Handy flags
 | `--seeds 4` | more candidates per strength |
 | `--denoise 0.5` | one strength for everything, overriding `sprites.json` |
 
-Output goes to ComfyUI's output folder under `aster/regen-<date-time>/`, named
-`<sprite>_d<denoise>_s<seed>`. The aster-app Gallery tab shows it, so you can pick from
-the phone. **Nothing is overwritten**, in this repo or in hers.
+Output goes straight into ComfyUI's output folder, named
+`ASTER_regen-<date-time>_<sprite>_d<denoise>_s<seed>`. Her app's **Gallery** tab shows
+them under the **✳ Hers** filter, so you can pick from the phone. **Nothing is overwritten**, in this repo or in hers.
 
 Tuning lives in `sprites.json`: per-sprite scene text, denoise, and a `fix` note saying
 what's wrong with the current file.
+
+## Animation frames (`--frames`)
+
+The desktop pet now plays multi-frame animations: wave, dance, celebrate, spin and 14
+more, 68 frames in all. Until real frames exist it fakes them from the stills.
+`--frames` renders them, each img2img off `idle_cut.png` at high denoise, so the pose
+changes while scale, baseline and palette stay put. All frames of one clip share a seed.
+
+```
+python characters\sprite-regen\regen.py --sprites C:\Users\GH-DA\Aster\sprites --frames --priority 1
+```
+
+| flag | does |
+|---|---|
+| `--priority 1` | the 21 most visible frames (wave, happy, dance, celebrate). `2`–`4` add more |
+| `--only dance spin` | just those clips |
+| `--seeds 3` | three candidate looks per clip; pick the seed whose frames match best |
+
+Output is named `<clip>_NN_cut_d<denoise>_s<seed>`. Cut each winner with `cutout.ps1`
+to `Aster\sprites\<clip>_NN_cut.png` and restart the pet. It picks them up with no code
+change. Names, counts and timing come from `docs/pet-frames.md` in her repo, which is
+the source of truth. Keep `sprites.json` → `frames` in step with it.
+
+**Paint the tail in the idle position** (low, to her right). The pet strips each
+frame's tail and animates one shared tail, so a tail anywhere else leaves a seam.
 
 ## Pick winners
 

@@ -1,13 +1,14 @@
 {
   "_about": "One entry per sprite in ghdathegabbalion/Aster/sprites/. Each is regenerated img2img off its current file so pose, composition and setting survive while the design moves to canon. 'scene' is appended after characters/aster-prompt.txt. 'fix' names drift seen in the current file, so the checker knows what to look at first. Tune 'denoise' here, not in regen.py.",
-
   "defaults": {
     "steps": 30,
     "cfg": 6.5,
     "seeds": 2,
-    "denoise": [0.45, 0.55]
+    "denoise": [
+      0.45,
+      0.55
+    ]
   },
-
   "full": [
     {
       "name": "idle",
@@ -23,7 +24,10 @@
       "name": "happy",
       "scene": "full body, jumping, laughing with open mouth, white t-shirt with violet star print, navy shorts, splashing in the ocean, bright blue sky, white clouds",
       "fix": "TWO TAILS (cream fox tail plus separate tentacle) — the worst sprite; no scarf; no pouch. Expect to need the 0.55 pass or an inpaint on the tail",
-      "denoise": [0.55, 0.62]
+      "denoise": [
+        0.55,
+        0.62
+      ]
     },
     {
       "name": "dance",
@@ -51,19 +55,229 @@
       "fix": "cream constellation tail and tentacle read as two limbs; no pouch; no bloom; brown eyes"
     }
   ],
-
   "chibi": {
     "_about": "Desktop-pet cutouts. Rendered on a flat mint background so cutout.ps1 can key it out — mint is far from cream fur, lavender and ink-violet, so the flood fill stops cleanly at her edge. The source cutout is composited onto that mint inside the graph, because a transparent PNG fed straight to img2img comes out on black.",
     "background": "(plain flat mint green background:1.3), simple background, no scenery",
-    "background_rgb": [191, 232, 208],
+    "background_rgb": [
+      191,
+      232,
+      208
+    ],
     "prefix": "chibi, super deformed, big head, stubby limbs, full body, lavender cable-knit sweater, white knitted scarf",
-    "denoise": [0.55, 0.65],
+    "denoise": [
+      0.55,
+      0.65
+    ],
     "frames": [
-      { "name": "idle_cut",    "scene": "standing, gentle smile, paws at sides" },
-      { "name": "think_cut",   "scene": "thinking, paw on chin, looking up" },
-      { "name": "sleepy_cut",  "scene": "yawning, eyes closed, drowsy" },
-      { "name": "wave_02_cut", "scene": "waving, paw raised to shoulder height", "pair": "wave" },
-      { "name": "wave_03_cut", "scene": "waving, paw raised high above head", "pair": "wave" }
+      {
+        "name": "idle_cut",
+        "scene": "standing, gentle smile, paws at sides"
+      },
+      {
+        "name": "think_cut",
+        "scene": "thinking, paw on chin, looking up"
+      },
+      {
+        "name": "sleepy_cut",
+        "scene": "yawning, eyes closed, drowsy"
+      },
+      {
+        "name": "wave_02_cut",
+        "scene": "waving, paw raised to shoulder height",
+        "pair": "wave"
+      },
+      {
+        "name": "wave_03_cut",
+        "scene": "waving, paw raised high above head",
+        "pair": "wave"
+      }
+    ]
+  },
+  "frames": {
+    "_about": "Multi-frame pet animations, from ghdathegabbalion/Aster docs/pet-frames.md (the source of truth for names, counts and timing — keep in step). Each frame is img2img off idle_cut.png at high denoise so the pose can change while scale, baseline and palette stay put. All frames of one clip share a seed, which keeps them looking like one sequence. Tail: the pet runtime strips each frame's painted tail and animates one shared tail, so every pose keeps the tail low to her right, in the idle position.",
+    "source": "idle_cut",
+    "denoise": [
+      0.72
+    ],
+    "seeds": 1,
+    "suffix": "tail curling low to the right behind her as in idle, same scale and baseline as idle",
+    "clips": [
+      {
+        "clip": "wave",
+        "priority": 1,
+        "poses": [
+          "right paw at shoulder, smiling",
+          "paw raised and tilted outward, waving",
+          "paw held high, open-mouth smile",
+          "paw tilted inward, waving"
+        ]
+      },
+      {
+        "clip": "happy",
+        "priority": 1,
+        "poses": [
+          "paws clasped at chest, happy closed eyes ^^",
+          "paws up at cheek height, open smile",
+          "small bounce, arms out, ears splayed"
+        ]
+      },
+      {
+        "clip": "dance",
+        "priority": 1,
+        "poses": [
+          "leaning left, left paw up, dancing",
+          "centre, both paws up, dancing",
+          "leaning right, right paw up, dancing",
+          "centre, paws down, knees bent",
+          "hip bump to the left, paws on hips",
+          "starting a twirl, arms out",
+          "hip bump to the right, paws on hips",
+          "centre, clapping paws"
+        ]
+      },
+      {
+        "clip": "celebrate",
+        "priority": 1,
+        "poses": [
+          "crouching, arms down, about to jump",
+          "launching upward, arms swinging up",
+          "mid-air star pose, arms and legs out",
+          "falling, arms up",
+          "landing in a squat",
+          "both fists up, cheering"
+        ]
+      },
+      {
+        "clip": "think",
+        "priority": 2,
+        "poses": [
+          "paw on chin, eyes looking up-left",
+          "paw on chin, eyes looking up-right, one ear tilted"
+        ]
+      },
+      {
+        "clip": "typing",
+        "priority": 2,
+        "poses": [
+          "typing on a small floating lavender laptop, left paw down",
+          "typing on a small floating lavender laptop, both paws up",
+          "typing on a small floating lavender laptop, right paw down",
+          "typing on a small floating lavender laptop, both paws down, focused, tongue poking out"
+        ]
+      },
+      {
+        "clip": "sleepy",
+        "priority": 2,
+        "poses": [
+          "half-lidded eyes, drowsy",
+          "eyes closed, small yawn"
+        ]
+      },
+      {
+        "clip": "excited",
+        "priority": 2,
+        "poses": [
+          "fists up, sparkly eyes",
+          "fists up, body twisted to the left",
+          "fists pumped high, mouth open",
+          "fists up, body twisted to the right"
+        ]
+      },
+      {
+        "clip": "shy",
+        "priority": 2,
+        "poses": [
+          "paws over mouth, blushing, looking down",
+          "peeking over her paws, blushing",
+          "hiding half her face behind her white scarf"
+        ]
+      },
+      {
+        "clip": "heart",
+        "priority": 3,
+        "poses": [
+          "paws together at chest",
+          "making heart hands",
+          "heart hands raised to her face, winking",
+          "heart hands held up, eyes closed smile"
+        ]
+      },
+      {
+        "clip": "surprised",
+        "priority": 3,
+        "poses": [
+          "startled, ears straight up, eyes wide, paws up",
+          "jolting upward, mouth an o shape",
+          "settled, paw on chest, relieved"
+        ]
+      },
+      {
+        "clip": "yawn",
+        "priority": 3,
+        "poses": [
+          "inhaling, eyes squinting",
+          "big yawn, eyes shut, paw over mouth",
+          "sleepy smile, eyes half open"
+        ]
+      },
+      {
+        "clip": "stretch",
+        "priority": 3,
+        "poses": [
+          "paws interlocked in front",
+          "arms rising overhead",
+          "full stretch on tiptoe, eyes closed",
+          "leaning right mid-stretch",
+          "arms dropping, content"
+        ]
+      },
+      {
+        "clip": "peek",
+        "priority": 3,
+        "poses": [
+          "crouched, face hidden behind paws",
+          "peeking out from the left side of her paws",
+          "peeking out from the right side, grinning",
+          "standing up, paws out, boo"
+        ]
+      },
+      {
+        "clip": "spin",
+        "priority": 3,
+        "poses": [
+          "facing front",
+          "three-quarter view turned to her right",
+          "back view, her one tail curling fully visible",
+          "three-quarter view turned to her left",
+          "facing front, arms out, ta-da"
+        ]
+      },
+      {
+        "clip": "walk",
+        "priority": 4,
+        "poses": [
+          "walking toward viewer, left foot forward, arms swinging",
+          "walking, passing pose, up on toes",
+          "walking toward viewer, right foot forward, arms swinging",
+          "walking, passing pose"
+        ]
+      },
+      {
+        "clip": "cozy",
+        "priority": 4,
+        "poses": [
+          "sitting, leaning slightly to her left, content smile",
+          "sitting, leaning slightly to her left, eyes closed"
+        ]
+      },
+      {
+        "clip": "nap",
+        "priority": 4,
+        "poses": [
+          "sitting curled up asleep, eyes closed",
+          "sitting curled up asleep, one ear drooped"
+        ]
+      }
     ]
   }
 }

@@ -59,9 +59,9 @@ class StubComfy(BaseHTTPRequestHandler):
         if path.startswith("/history/"):
             pid = path.rsplit("/", 1)[1]
             prefix = self.graphs[int(pid)]["30"]["inputs"]["filename_prefix"]
+            sub, _, name = prefix.rpartition("/")
             return self._json({pid: {"status": {"status_str": "success"}, "outputs": {
-                "30": {"images": [{"filename": prefix.rsplit("/", 1)[1] + "_00001_.png",
-                                   "subfolder": prefix.rsplit("/", 1)[0]}]}}}})
+                "30": {"images": [{"filename": name + "_00001_.png", "subfolder": sub}]}}}})
         self._json({}, 404)
 
     def do_POST(self):
@@ -144,7 +144,9 @@ class RegenTests(unittest.TestCase):
         self.assertNotIn("11", g)  # no background composite for full sprites
         self.assertTrue(g["3"]["inputs"]["text"].startswith("asterfen,"))
         self.assertIn("splashing in the ocean", g["3"]["inputs"]["text"])
-        self.assertTrue(g["30"]["inputs"]["filename_prefix"].startswith("aster/regen-"))
+        prefix = g["30"]["inputs"]["filename_prefix"]
+        self.assertTrue(prefix.startswith("ASTER_regen-"))   # her gallery's "Hers" filter
+        self.assertNotIn("/", prefix)  # her gallery only lists the output folder's top level
 
     def test_chibi_gets_flat_background_and_keeps_its_size(self):
         self.assertEqual(self.run_regen("--only", "wave_02_cut", "--seeds", "1",
@@ -166,6 +168,37 @@ class RegenTests(unittest.TestCase):
     def test_missing_source_is_skipped_not_fatal(self):
         self.assertEqual(self.run_regen("--only", "idle", "happy", "--seeds", "1"), 0)
         self.assertEqual(StubComfy.uploads, ["happy.png"])
+
+    def test_frames_cover_the_pet_spec_and_share_seeds_per_clip(self):
+        jobs = regen.plan_frame_jobs(regen.load_manifest())
+        names = {j["name"] for j in jobs}
+        self.assertEqual(len(names), 68)
+        self.assertIn("dance_08_cut", names)
+        self.assertIn("wave_01_cut", names)
+        self.assertTrue(all(j["source"] == "idle_cut" and j["form"] == "chibi" for j in jobs))
+        dance = {(j["seed"], j["denoise"]) for j in jobs if j["name"].startswith("dance_")}
+        self.assertEqual(len(dance), 1)  # one look for the whole clip
+        self.assertIn("flat mint green background", jobs[0]["scene"])
+
+    def test_frame_priority_and_only_filters(self):
+        m = regen.load_manifest()
+        p1 = {j["name"].rsplit("_", 2)[0] for j in regen.plan_frame_jobs(m, priority=1)}
+        self.assertEqual(p1, {"wave", "happy", "dance", "celebrate"})
+        only = regen.plan_frame_jobs(m, only=["spin"])
+        self.assertEqual([j["name"] for j in only],
+                         [f"spin_{n:02d}_cut" for n in range(1, 6)])
+        with self.assertRaises(SystemExit):
+            regen.plan_frame_jobs(m, only=["moonwalk"])
+
+    def test_frames_render_off_idle_and_save_under_frame_names(self):
+        tiny_png(self.sprites / "idle_cut.png", 512, 640)
+        self.assertEqual(self.run_regen("--frames", "--only", "think"), 0)
+        self.assertEqual(StubComfy.uploads, ["idle_cut.png"])  # one upload for all frames
+        prefixes = [g["30"]["inputs"]["filename_prefix"] for g in StubComfy.graphs]
+        self.assertEqual(len(prefixes), 2)
+        self.assertIn("_think_01_cut_d72_", prefixes[0])
+        self.assertIn("_think_02_cut_d72_", prefixes[1])
+        self.assertEqual(StubComfy.graphs[0]["14"]["inputs"]["width"], 1024)  # chibi path
 
     def test_dry_run_touches_nothing(self):
         self.assertEqual(regen.main(["--dry-run", "--only", "dance", "--comfy", "http://127.0.0.1:9"]), 0)
